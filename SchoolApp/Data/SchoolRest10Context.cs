@@ -129,6 +129,7 @@ public class SchoolRest10Context : DbContext
     private void ApplyAuditInfo()
     {
         var now = DateTime.UtcNow;
+
         foreach (var entry in ChangeTracker.Entries<BaseEntity>())
         {
             switch (entry.State)
@@ -137,15 +138,17 @@ public class SchoolRest10Context : DbContext
                     entry.Entity.InsertedAt = now;
                     entry.Entity.ModifiedAt = now;
                     break;
-                case EntityState.Modified:
-                    entry.Entity.ModifiedAt = now;
-                    break;
-                case EntityState.Deleted:
-                    entry.State = EntityState.Unchanged;
-                    entry.Entity.IsDeleted = true;
-                    entry.Entity.DeletedAt = now;
-                    entry.Entity.ModifiedAt = now;
-                    break;
+                                                         // My note: On soft delete, in order for the deleted records to be hidden from the queries the cmd: HasQueryFilter(e => !e.IsDeleted) in OnModelCreating is needed!!! Otherwise, without this the deleted records will be stil visible.
+                //case EntityState.Modified:
+                //    entry.Entity.ModifiedAt = now;
+                //    break;
+
+                //case EntityState.Deleted:
+                //    entry.State = EntityState.Unchanged;
+                //    entry.Entity.IsDeleted = true;
+                //    entry.Entity.DeletedAt = now;
+                //    entry.Entity.ModifiedAt = now;
+                //    break;
             }
         }
     }
