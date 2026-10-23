@@ -134,8 +134,7 @@ namespace SchoolApp.Migrations
                     b.Property<string>("Am")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("AM");
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<DateTime>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -165,7 +164,7 @@ namespace SchoolApp.Migrations
 
                     b.HasIndex(new[] { "Institution" }, "IX_Students_Institution");
 
-                    b.HasIndex(new[] { "Am" }, "UQ_Students_AM")
+                    b.HasIndex(new[] { "Am" }, "UQ_Students_Am")
                         .IsUnique();
 
                     b.HasIndex(new[] { "UserId" }, "UQ_Students_UserId")
@@ -312,7 +311,7 @@ namespace SchoolApp.Migrations
                     b.HasOne("SchoolApp.Models.Teacher", "Teacher")
                         .WithMany("Courses")
                         .HasForeignKey("TeacherId")
-                        .HasConstraintName("FK_Courses_Teachers");
+                        .HasConstraintName("FK_Courses_Teachers_TeacherId");
 
                     b.Navigation("Teacher");
                 });
@@ -324,7 +323,7 @@ namespace SchoolApp.Migrations
                         .HasForeignKey("SchoolApp.Models.Student", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_Students_Users");
+                        .HasConstraintName("FK_Students_Users_UserId");
 
                     b.Navigation("User");
                 });

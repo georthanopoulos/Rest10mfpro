@@ -39,16 +39,16 @@ public class SchoolRest10Context : DbContext
 
         modelBuilder.Entity<Student>(entity =>
         {
-            entity.Property(e => e.Am).HasMaxLength(10).HasColumnName("AM");
+            entity.Property(e => e.Am).HasMaxLength(10);
             entity.Property(e => e.Department).HasMaxLength(50);
             entity.Property(e => e.Institution).HasMaxLength(50);
 
             entity.HasOne(d => d.User).WithOne(p => p.Student)
                 .HasForeignKey<Student>(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_Students_Users");
+                .HasConstraintName("FK_Students_Users_UserId");
 
-            entity.HasIndex(e => e.Am, "UQ_Students_AM").IsUnique();
+            entity.HasIndex(e => e.Am, "UQ_Students_Am").IsUnique();
             entity.HasIndex(e => e.Institution, "IX_Students_Institution");
             entity.HasIndex(e => e.UserId, "UQ_Students_UserId").IsUnique();
         });
@@ -60,7 +60,7 @@ public class SchoolRest10Context : DbContext
             entity.HasOne(d => d.Teacher)
                 .WithMany(p => p.Courses)
                 .HasForeignKey(d => d.TeacherId)
-                .HasConstraintName("FK_Courses_Teachers");
+                .HasConstraintName("FK_Courses_Teachers_TeacherId");
 
             // Τα πεδία του Composite Key ονομάζονται by default StudentsId και CoursesId
             entity.HasMany(d => d.Students).WithMany(p => p.Courses).UsingEntity("StudentsCourses");
