@@ -2,13 +2,15 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using SchoolApp.Configuration;
 using SchoolApp.Data;
+using SchoolApp.Helpers;
 using SchoolApp.Repositories;
 using SchoolApp.Security;
 using SchoolApp.Services;
 using Serilog;
-using System.Security.Cryptography;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -71,6 +73,26 @@ namespace SchoolApp
             });
 
 
+            builder.Services.AddEndpointsApiExplorer();    // scan all the enpoints and make a description of them.
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "School App", Version = "v1" });     // Always having endpoints WITH versioning. As in here! SOS!!!
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
+
+                options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme,
+                    new OpenApiSecurityScheme
+                    {
+                        Description = "JWT Authentication header using the Bearer Scheme",
+                        Type = SecuritySchemeType.Http,
+                        Scheme = JwtBearerDefaults.AuthenticationScheme,
+                        BearerFormat = "JWT"
+                    });
+                options.OperationFilter<AuthorizeOperationFilter>();
+            });
+
+
             // Add services to the container.
 
             builder.Services.AddControllers();
@@ -82,7 +104,10 @@ namespace SchoolApp
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                
+                app.UseSwagger();
+                app.UseSwaggerUI();
+                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "School App v1"));  // If we had v1 , v2 , v3 etc we must state them as this. and upper in the code too (in line 79).
+                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "School App v1"));
             }
 
                                                                  // In this order below! SOS!!!!
