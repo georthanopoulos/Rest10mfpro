@@ -1,5 +1,3 @@
 ﻿namespace SchoolApp.DTO;
 
-public class JwtTokenDTO
-{
-}
+public record JwtTokenDTO(string Token);

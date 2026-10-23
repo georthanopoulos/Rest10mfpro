@@ -96,18 +96,26 @@ namespace SchoolApp
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddProblemDetails();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-          
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("VIEW_USERS", p => p.RequireClaim("Capability", "VIEW_USERS"));
+            });
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            
+            app.UseExceptionHandler();              // Configure the HTTP request pipeline.
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
                 //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "School App v1"));  // If we had v1 , v2 , v3 etc we must state them as this. and upper in the code too (in line 79).
-                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "School App v1"));
+                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v2/swagger.json", "School App v2"));
             }
 
                                                                  // In this order below! SOS!!!!

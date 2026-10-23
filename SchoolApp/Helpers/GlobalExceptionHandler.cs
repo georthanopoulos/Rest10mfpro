@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using SchoolApp.Exceptions;
-using System.ComponentModel;
 
 namespace SchoolApp.Helpers;
 
@@ -61,6 +60,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             contentType: "application/problem+json",
             cancellationToken: cancellationToken
             );
+
         return true;
 
     }
