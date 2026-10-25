@@ -41,13 +41,13 @@ namespace SchoolApp
             var jwtSettings = builder.Configuration.GetSection("Jwt");
             builder.Services.AddAuthentication(options =>
             {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;   // how Kestrel recognizes the user. It reads the JWT from the header,the Authorization: Bearer<token>.
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;        // what the Kestrel does when the user is unauthenticated - sends 401 Unauthorized message.
             }).AddJwtBearer(options =>
             {
-                options.IncludeErrorDetails = builder.Environment.IsDevelopment();
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
+                options.IncludeErrorDetails = builder.Environment.IsDevelopment();    // with this we set the response packet to include error description for debugging. (In production level is false by default).
+                options.TokenValidationParameters = new TokenValidationParameters     
+                {                                                                   // with options.SaveToken = true, if save of the raw token at HttpContext is required, so that it can be obtained with: HttpContext.GetTokenAsync"access_token"). 
                     ValidateIssuer = true,
                     ValidIssuer = jwtSettings["Issuer"],
                     ValidateAudience = true,
@@ -58,8 +58,8 @@ namespace SchoolApp
                 };
             });
                                                                                            // CORS policy configuration
-            builder.Services.AddCors(options =>
-            {
+            builder.Services.AddCors(options =>                 // Note also that UseCors() MUST be PRIOR to UseAuthentication() as browser sends a preflight request(Options) first, in order to ask whether the access is permitted or not.
+            {                                                      // If CORS middleware is not running first, the the preflight will be rejected by the authentication middleware( not havind JWT token) and the browser will never send the real request!!! 
                 options.AddPolicy("AllowCFClient", policy => policy.WithOrigins(builder.Configuration["Cors:Origin"]!)
                 .AllowAnyMethod()
                 .AllowAnyHeader());
@@ -122,7 +122,7 @@ namespace SchoolApp
             app.UseHttpsRedirection();
 
             app.UseCors("AllowCFClient");
-
+            app.UseAuthentication();                        // Enables the authentication middleware in the pipeline. The incoming requests will be checked for JWT token and the HttpContext.User will becoming populate. The HttpContext.User is the principal.
             app.UseAuthorization();
 
 

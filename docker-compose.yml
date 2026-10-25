@@ -19,7 +19,7 @@ services:
     build: .
     container_name: rest10mfpro-app
     ports:
-      - "${APP_PORT:-8081}:8080"              #port mapping - host port από .env ή default 8081, container port 8080 (όπως ορίζεται στο appsettings.json)
+      - "${APP_PORT:-8081}:8080"              # port mapping - host port από .env ή default 8081, container port 8080 (όπως ορίζεται στο appsettings.json)
     environment:
       Jwt__Issuer: "${JWT_ISSUER:-https://localhost:8081}"
       Jwt__Audience: "${JWT_AUDIENCE:-https://localhost:8081}"
