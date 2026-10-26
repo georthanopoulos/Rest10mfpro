@@ -73,7 +73,7 @@ namespace SchoolApp
             });
 
 
-            builder.Services.AddEndpointsApiExplorer();    // scan all the enpoints and make a description of them.
+            builder.Services.AddEndpointsApiExplorer();    // scan all the endpoints and make a description of them.
             builder.Services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo { Title = "School App", Version = "v1" });     // Always having endpoints WITH versioning. As in here! SOS!!!

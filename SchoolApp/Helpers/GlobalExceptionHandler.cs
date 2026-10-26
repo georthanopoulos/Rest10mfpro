@@ -72,6 +72,6 @@ public class GlobalExceptionHandler : IExceptionHandler
         InvalidArgumentException => (StatusCodes.Status400BadRequest, "Invalid Argument", true),
         EntityNotAuthorizedException => (StatusCodes.Status401Unauthorized, "Unauthenticated", true),
         EntityForbiddenException => (StatusCodes.Status403Forbidden, "Forbidden", true),
-        _ => (StatusCodes.Status500InternalServerError, "Internal Server Error", false)
+        _ => (StatusCodes.Status500InternalServerError, "Internal Server Error", false)    // _ means Default case. It catches every other exception and handles it as unpredictable error: 500 Internal Server Error, isExpected = false.
     };
 }
