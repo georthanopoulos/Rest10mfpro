@@ -9,5 +9,4 @@ public class Role
     public ICollection<User> Users { get; set; } = new HashSet<User>();
 
     public ICollection<Capability> Capabilities { get; set; } = new HashSet<Capability>();
-
 }
