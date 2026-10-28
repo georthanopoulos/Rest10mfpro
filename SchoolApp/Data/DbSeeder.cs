@@ -6,10 +6,12 @@ namespace SchoolApp.Data;
 public class DbSeeder
 {
     private readonly SchoolRest10Context _context;
+    private readonly IConfiguration _configuration;
 
-    public DbSeeder(SchoolRest10Context context)
+    public DbSeeder(SchoolRest10Context context, IConfiguration configuration)
     {
         _context = context;
+        _configuration = configuration;
     }
 
     public async Task SeedAsync()
@@ -28,5 +30,9 @@ public class DbSeeder
         }
 
         await _context.SaveChangesAsync();
+
+        string? adminUsername = _configuration["Seed:AdminUsername"];
+        string? adminEmail = _configuration["Seed:AdminEmail"];
+        string? adminPassword = _configuration["Seed:AdminPassword"];
     }
 }
