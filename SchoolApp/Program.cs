@@ -18,7 +18,7 @@ namespace SchoolApp
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +35,8 @@ namespace SchoolApp
             builder.Services.AddScoped<ITeacherService, TeacherService>();
             builder.Services.AddScoped<IApplicationService, ApplicationService>();
             builder.Services.AddSingleton<IEncryptionUtil,  EncryptionUtil>();
+
+            builder.Services.AddScoped<DbSeeder>();                                       // DbSeeder added
 
             builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MapperConfig>());
 
@@ -95,7 +97,6 @@ namespace SchoolApp
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -105,10 +106,22 @@ namespace SchoolApp
                 options.AddPolicy("VIEW_USERS", p => p.RequireClaim("Capability", "VIEW_USERS"));
             });
 
-            var app = builder.Build();
+            // END of Service registration area (above). Container configs. No object has beed created yet!!!!
 
-            
-            app.UseExceptionHandler();              // Configure the HTTP request pipeline.
+
+            var app = builder.Build();             // container is being built - below onwards
+
+
+            // START of the section where the container has already been built and we can ask  objects from app.Services. (eg: Request pipeline, middleware config, seeding and startup actions).    
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+                await seeder.SeedAsync();
+            }
+
+
+                app.UseExceptionHandler();              // Configure the HTTP request pipeline.
 
             if (app.Environment.IsDevelopment())
             {
