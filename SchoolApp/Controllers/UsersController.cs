@@ -106,21 +106,12 @@ public class UsersController : ControllerBase
 
     private void EnsureCanViewUserCore(bool isOwnProfile)
     {
-        var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
-        // Self-view: Teachers και Students μπορούν να δουν τον εαυτό τους
-        if (isOwnProfile && (currentUserRole == "TEACHER" || currentUserRole == "STUDENT"))
+        // Allowed: own profile OR VIEW_USERS capability
+        if (isOwnProfile || User.HasClaim("Capability", "VIEW_USERS"))
         {
             return;
         }
-
-        // Other-view: χρειάζεται VIEW_TEACHER ή VIEW_STUDENT capability
-        //var canViewOthers = User.HasClaim("capability", "VIEW_USER+TEACHER");
-
-        //if (canViewOthers)
-        //{
-        //    return;
-        //}
 
         throw new EntityForbiddenException("User",
             "You do not have permission to view this user.");

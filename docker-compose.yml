@@ -26,6 +26,9 @@ services:
       Jwt__Secret: "${JWT_SECRET}"
       Cors__Origin: "${CORS_ORIGIN:-http://localhost:3000}"
       AllowedHosts: "${ALLOWED_HOSTS:-*}"
+      Seed__AdminUsername: "${SEED_ADMIN_USERNAME}"
+      Seed__AdminEmail: "${SEED_ADMIN_EMAIL}"
+      Seed__AdminPassword: "${SEED_ADMIN_PASSWORD}"
       ASPNETCORE_ENVIRONMENT: "${ASPNETCORE_ENVIRONMENT:-Production}"
       ConnectionStrings__DevConnection: "Server=${DB_HOST};Database=${DB_NAME};User=${DB_USER};Password=${DB_USER_PASSWORD};MultipleActiveResultSets=true;TrustServerCertificate=True"
     depends_on:   

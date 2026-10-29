@@ -3,6 +3,7 @@ using SchoolApp.Core;
 using SchoolApp.Data;
 using SchoolApp.Models;
 using System.Linq.Expressions;
+using System.Reflection.Metadata.Ecma335;
 
 namespace SchoolApp.Repositories;
 
@@ -23,7 +24,8 @@ public class UserRepository : BaseRepository<User>, IUserRepository       // fir
     public async Task<PaginatedResult<User>> GetUsersAsync(int pageNumber, int pageSize,
         List<Expression<Func<User, bool>>> predicates)
     {
-        IQueryable<User> query = _context.Users;                // is NOT being executed yet.
+        IQueryable<User> query = _context.Users                // is NOT being executed yet.
+            .Include(u => u.Role);
 
         if (predicates is not null && predicates.Count > 0)
         {
@@ -47,5 +49,12 @@ public class UserRepository : BaseRepository<User>, IUserRepository       // fir
             .ToListAsync();                                                                          // is being executed
 
         return new PaginatedResult<User>(data, totalRecords, pageNumber, pageSize);
+    }
+
+    public override async Task<User?> GetAsync(int id)
+    {
+        return await _context.Users
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Id == id);
     }
 }
