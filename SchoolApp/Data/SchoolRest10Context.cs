@@ -77,15 +77,35 @@ public class SchoolRest10Context : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.Property(e => e.Name).HasMaxLength(50);
+        entity.Property(e => e.Name).HasMaxLength(50);
 
-            entity.HasMany(d => d.Capabilities).WithMany(p => p.Roles)
-                .UsingEntity("RolesCapabilities", j =>         // for the first term of the complex element RoleCapabilities it has index automatically. BUT for the second term (capabilities) we need to define one.
-                {
-                    j.HasIndex("CapabilitiesId").HasDatabaseName("IX_RolesCapabilities_CapabilityId");
-                });
+        entity.HasMany(d => d.Capabilities).WithMany(p => p.Roles)
+            .UsingEntity("RolesCapabilities", j =>         // for the first term of the complex element RoleCapabilities it has index automatically. BUT for the second term (capabilities) we need to define one.
+            {
+                j.HasIndex("CapabilitiesId").HasDatabaseName("IX_RolesCapabilities_CapabilityId");
+                j.HasData(new { RolesId = 3, CapabilitiesId = 6 });        // TEACHER (3): view only teacher
+                j.HasData(new { RolesId = 4, CapabilitiesId = 12 });       // STUDENT (4): view only student
+                j.HasData(                                                 // EMPLOYEE (2): insert teacher/student, view teachers/students/courses, view users
+                new { RolesId = 2, CapabilitiesId = 1 },
+                new { RolesId = 2, CapabilitiesId = 2 },
+                new { RolesId = 2, CapabilitiesId = 3 },
+                new { RolesId = 2, CapabilitiesId = 7 },
+                new { RolesId = 2, CapabilitiesId = 8 },
+                new { RolesId = 2, CapabilitiesId = 9 },
+                new { RolesId = 2, CapabilitiesId = 14 },
+                new { RolesId = 2, CapabilitiesId = 15 },
+                new { RolesId = 2, CapabilitiesId = 18 });
+                j.HasData(Enumerable.Range(1, 18)                           // ADMIN (1): ALL 18 rights reserved. The command produces all numbers from 1 up to 18 and with Select a line for each one is created, instead of writing 18 line sof code.
+                       .Select(id => new { RolesId = 1, CapabilitiesId = id }));
 
-            entity.HasIndex(e => e.Name, "UQ_Roles_Name").IsUnique();
+            });
+
+        entity.HasIndex(e => e.Name, "UQ_Roles_Name").IsUnique();
+
+        entity.HasData(new Role { Id = 1, Name = "ADMIN" },
+            new Role { Id = 2, Name = "EMPLOYEE"},
+            new Role { Id = 3, Name = "TEACHER" },
+            new Role { Id = 4, Name = "STUDENT"});
         });
 
         modelBuilder.Entity<Capability>(entity =>
@@ -93,6 +113,26 @@ public class SchoolRest10Context : DbContext
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.Name).HasMaxLength(100);
             entity.HasIndex(e => e.Name, "UQ_Capabilities_Name").IsUnique();
+
+            entity.HasData(
+            new Capability { Id = 1, Name = "INSERT_TEACHER", Description = "Create a new teacher" },
+            new Capability { Id = 2, Name = "VIEW_TEACHERS", Description = "View teacher list and details" },
+            new Capability { Id = 3, Name = "VIEW_TEACHER", Description = "View teacher" },
+            new Capability { Id = 4, Name = "EDIT_TEACHER", Description = "Modify existing teacher" },
+            new Capability { Id = 5, Name = "DELETE_TEACHER", Description = "Remove a teacher" },
+            new Capability { Id = 6, Name = "VIEW_ONLY_TEACHER", Description = "View only own teacher details" },
+            new Capability { Id = 7, Name = "INSERT_STUDENT", Description = "Create a new student" },
+            new Capability { Id = 8, Name = "VIEW_STUDENTS", Description = "View student list and details" },
+            new Capability { Id = 9, Name = "VIEW_STUDENT", Description = "View student" },
+            new Capability { Id = 10, Name = "EDIT_STUDENT", Description = "Modify existing student" },
+            new Capability { Id = 11, Name = "DELETE_STUDENT", Description = "Remove a student" },
+            new Capability { Id = 12, Name = "VIEW_ONLY_STUDENT", Description = "View only own student details" },
+            new Capability { Id = 13, Name = "INSERT_COURSE", Description = "Create a new course" },
+            new Capability { Id = 14, Name = "VIEW_COURSES", Description = "View course list and details" },
+            new Capability { Id = 15, Name = "VIEW_COURSE", Description = "View course" },
+            new Capability { Id = 16, Name = "EDIT_COURSE", Description = "Modify existing course" },
+            new Capability { Id = 17, Name = "DELETE_COURSE", Description = "Remove a course" },
+            new Capability { Id = 18, Name = "VIEW_USERS", Description = "View the list of all users (registry)" });
         });
 
         modelBuilder.Entity<User>(entity =>

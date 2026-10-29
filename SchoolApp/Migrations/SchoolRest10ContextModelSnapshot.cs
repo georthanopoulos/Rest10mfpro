@@ -121,6 +121,28 @@ namespace SchoolApp.Migrations
                         .IsUnique();
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "EMPLOYEE"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "TEACHER"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "STUDENT"
+                        });
                 });
 
             modelBuilder.Entity("SchoolApp.Models.Student", b =>
