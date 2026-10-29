@@ -38,6 +38,153 @@ namespace SchoolApp.Migrations
                     b.HasIndex("RolesId");
 
                     b.ToTable("RolesCapabilities");
+
+                    b.HasData(
+                        new
+                        {
+                            CapabilitiesId = 6,
+                            RolesId = 3
+                        },
+                        new
+                        {
+                            CapabilitiesId = 12,
+                            RolesId = 4
+                        },
+                        new
+                        {
+                            CapabilitiesId = 1,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 2,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 3,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 7,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 8,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 9,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 14,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 15,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 18,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 1,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 2,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 3,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 4,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 5,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 6,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 7,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 8,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 9,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 10,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 11,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 12,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 13,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 14,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 15,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 16,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 17,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 18,
+                            RolesId = 1
+                        });
                 });
 
             modelBuilder.Entity("SchoolApp.Models.Capability", b =>
@@ -63,6 +210,116 @@ namespace SchoolApp.Migrations
                         .IsUnique();
 
                     b.ToTable("Capabilities");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Create a new teacher",
+                            Name = "INSERT_TEACHER"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "View teacher list and details",
+                            Name = "VIEW_TEACHERS"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "View teacher",
+                            Name = "VIEW_TEACHER"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Modify existing teacher",
+                            Name = "EDIT_TEACHER"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Remove a teacher",
+                            Name = "DELETE_TEACHER"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "View only own teacher details",
+                            Name = "VIEW_ONLY_TEACHER"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "Create a new student",
+                            Name = "INSERT_STUDENT"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Description = "View student list and details",
+                            Name = "VIEW_STUDENTS"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Description = "View student",
+                            Name = "VIEW_STUDENT"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Description = "Modify existing student",
+                            Name = "EDIT_STUDENT"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Description = "Remove a student",
+                            Name = "DELETE_STUDENT"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Description = "View only own student details",
+                            Name = "VIEW_ONLY_STUDENT"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Description = "Create a new course",
+                            Name = "INSERT_COURSE"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Description = "View course list and details",
+                            Name = "VIEW_COURSES"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Description = "View course",
+                            Name = "VIEW_COURSE"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Description = "Modify existing course",
+                            Name = "EDIT_COURSE"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Description = "Remove a course",
+                            Name = "DELETE_COURSE"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Description = "View the list of all users (registry)",
+                            Name = "VIEW_USERS"
+                        });
                 });
 
             modelBuilder.Entity("SchoolApp.Models.Course", b =>
