@@ -104,6 +104,7 @@ namespace SchoolApp
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("VIEW_USERS", p => p.RequireClaim("Capability", "VIEW_USERS"));
+                options.AddPolicy("INSERT_TEACHER", p => p.RequireClaim("Capability", "INSERT_TEACHER"));
             });
 
             // END of Service registration area (above). Container configs. No object has beed created yet!!!!
