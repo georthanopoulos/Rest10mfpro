@@ -35,7 +35,7 @@ public class UserService : IUserService
     public async Task<PaginatedResult<UserReadOnlyDTO>> GetPaginatedUsersFilteredAsync(int pageNumber, int pageSize,
         UserFiltersDTO userFiltersDTO)
     {
-        List<User> users = [];
+
         List<Expression<Func<User, bool>>> predicates = [];
 
         if (!string.IsNullOrEmpty(userFiltersDTO.Username))
@@ -50,6 +50,14 @@ public class UserService : IUserService
 
         if (!string.IsNullOrEmpty(userFiltersDTO.UserRole))
         {
+            string[] validRoles = { "ADMIN", "EMPLOYEE", "TEACHER", "STUDENT" };
+
+            if (!validRoles.Contains(userFiltersDTO.UserRole))
+            { 
+                throw new InvalidArgumentException("UserRole",
+                    $"Unknown role '{userFiltersDTO.UserRole}'. Valid roles: {string.Join(", ", validRoles)}.");
+            }
+
             predicates.Add(u => u.Role.Name == userFiltersDTO.UserRole);
         }
 
