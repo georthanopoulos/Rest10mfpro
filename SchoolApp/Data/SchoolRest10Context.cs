@@ -20,6 +20,8 @@ public class SchoolRest10Context : DbContext
 
     public DbSet<User> Users { get; set; }
 
+    public DbSet<ActivationToken> ActivationTokens { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Teacher>(entity =>
@@ -95,7 +97,7 @@ public class SchoolRest10Context : DbContext
                 new { RolesId = 2, CapabilitiesId = 14 },
                 new { RolesId = 2, CapabilitiesId = 15 },
                 new { RolesId = 2, CapabilitiesId = 18 });
-                j.HasData(Enumerable.Range(1, 18)                           // ADMIN (1): ALL 18 rights reserved. The command produces all numbers from 1 up to 18 and with Select a line for each one is created, instead of writing 18 line sof code.
+                j.HasData(Enumerable.Range(1, 19)                           // ADMIN (1): ALL 19 rights reserved. The command produces all numbers from 1 up to 19 and with Select a line for each one is created, instead of writing 19 lines of code.
                        .Select(id => new { RolesId = 1, CapabilitiesId = id }));
 
             });
@@ -110,9 +112,9 @@ public class SchoolRest10Context : DbContext
 
         modelBuilder.Entity<Capability>(entity =>
         {
-            entity.Property(e => e.Description).HasMaxLength(255);
-            entity.Property(e => e.Name).HasMaxLength(100);
-            entity.HasIndex(e => e.Name, "UQ_Capabilities_Name").IsUnique();
+        entity.Property(e => e.Description).HasMaxLength(255);
+        entity.Property(e => e.Name).HasMaxLength(100);
+        entity.HasIndex(e => e.Name, "UQ_Capabilities_Name").IsUnique();
 
             entity.HasData(
             new Capability { Id = 1, Name = "INSERT_TEACHER", Description = "Create a new teacher" },
@@ -132,7 +134,8 @@ public class SchoolRest10Context : DbContext
             new Capability { Id = 15, Name = "VIEW_COURSE", Description = "View course" },
             new Capability { Id = 16, Name = "EDIT_COURSE", Description = "Modify existing course" },
             new Capability { Id = 17, Name = "DELETE_COURSE", Description = "Remove a course" },
-            new Capability { Id = 18, Name = "VIEW_USERS", Description = "View the list of all users (registry)" });
+            new Capability { Id = 18, Name = "VIEW_USERS", Description = "View the list of all users (registry)" },
+            new Capability { Id = 19, Name = "INSERT_ADMIN", Description = "Create another admin user" });
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -142,15 +145,30 @@ public class SchoolRest10Context : DbContext
             entity.Property(e => e.Lastname).HasMaxLength(50);
             entity.Property(e => e.Password).HasMaxLength(60);
             entity.Property(e => e.Username).HasMaxLength(50);
+            entity.Property(e => e.Status).HasConversion<string>().HasMaxLength(20);
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)
-                .OnDelete(DeleteBehavior.Cascade)  
+                .OnDelete(DeleteBehavior.Restrict)  
                 .HasConstraintName("FK_Users_Roles_RoleId");
 
             entity.HasIndex(e => e.Email, "UQ_Users_Email").IsUnique();
             entity.HasIndex(e => e.RoleId, "IX_Users_RoleId");
             entity.HasIndex(e => e.Username, "UQ_Users_Username").IsUnique();
+        });
+
+        modelBuilder.Entity<ActivationToken>(entity =>
+        {
+            entity.Property(e => e.TokenHash).HasMaxLength(64).IsRequired();
+
+            entity.HasOne(t => t.User).WithMany()         // withMany() is empty since User does not have a list of tokens.
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_ActivationTokens_Users_UserId");
+
+            entity.HasIndex(e => e.TokenHash, "UQ_ActivationTokens_TokenHash").IsUnique();
+            entity.HasIndex(e => e.UserId, "IX_ActivationTokens_UserId");
+
         });
     }
 

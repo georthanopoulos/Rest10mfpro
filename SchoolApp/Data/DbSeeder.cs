@@ -66,7 +66,8 @@ public class DbSeeder
             Email = adminEmail,
             Firstname = "System",
             Lastname = "Administrator",
-            Role = adminRole
+            Role = adminRole,
+            Status = AccountStatus.Active
         };
 
         _context.Users.Add(adminUser);

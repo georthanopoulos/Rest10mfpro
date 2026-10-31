@@ -8,7 +8,7 @@ public class User : BaseEntity
 
     public string Email { get; set; } = null!;
 
-    public string Password { get; set; } = null!;
+    public string? Password { get; set; } = null!;
 
     public string Firstname { get; set; } = null!;
 
@@ -21,4 +21,6 @@ public class User : BaseEntity
     public Student? Student { get; set; }
 
     public Teacher? Teacher { get; set; }
+
+    public AccountStatus Status { get; set; }
 }
