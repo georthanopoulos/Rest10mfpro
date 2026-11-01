@@ -23,4 +23,6 @@ public class User : BaseEntity
     public Teacher? Teacher { get; set; }
 
     public AccountStatus Status { get; set; }
+
+    public bool MustChangePassword { get; set; }
 }

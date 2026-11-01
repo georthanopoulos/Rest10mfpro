@@ -184,7 +184,47 @@ namespace SchoolApp.Migrations
                         {
                             CapabilitiesId = 18,
                             RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 19,
+                            RolesId = 1
                         });
+                });
+
+            modelBuilder.Entity("SchoolApp.Models.ActivationToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "UserId" }, "IX_ActivationTokens_UserId");
+
+                    b.HasIndex(new[] { "TokenHash" }, "UQ_ActivationTokens_TokenHash")
+                        .IsUnique();
+
+                    b.ToTable("ActivationTokens");
                 });
 
             modelBuilder.Entity("SchoolApp.Models.Capability", b =>
@@ -319,6 +359,12 @@ namespace SchoolApp.Migrations
                             Id = 18,
                             Description = "View the list of all users (registry)",
                             Name = "VIEW_USERS"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Description = "Create another admin user",
+                            Name = "INSERT_ADMIN"
                         });
                 });
 
@@ -330,7 +376,7 @@ namespace SchoolApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
@@ -415,7 +461,7 @@ namespace SchoolApp.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<DateTime>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Department")
@@ -460,7 +506,7 @@ namespace SchoolApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("InsertedAt")
@@ -478,6 +524,7 @@ namespace SchoolApp.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -487,6 +534,9 @@ namespace SchoolApp.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "Institution" }, "IX_Teachers_Institution");
+
+                    b.HasIndex(new[] { "PhoneNumber" }, "UQ_Teachers_PhoneNumber")
+                        .IsUnique();
 
                     b.HasIndex(new[] { "UserId" }, "UQ_Teachers_UserId")
                         .IsUnique();
@@ -502,7 +552,7 @@ namespace SchoolApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
@@ -529,13 +579,20 @@ namespace SchoolApp.Migrations
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("MustChangePassword")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -585,6 +642,18 @@ namespace SchoolApp.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SchoolApp.Models.ActivationToken", b =>
+                {
+                    b.HasOne("SchoolApp.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_ActivationTokens_Users_UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SchoolApp.Models.Course", b =>
                 {
                     b.HasOne("SchoolApp.Models.Teacher", "Teacher")
@@ -624,7 +693,7 @@ namespace SchoolApp.Migrations
                     b.HasOne("SchoolApp.Models.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_Users_Roles_RoleId");
 

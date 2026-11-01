@@ -36,6 +36,7 @@ public class SchoolRest10Context : DbContext
             .HasConstraintName("FK_Teachers_Users_UserId");
 
             entity.HasIndex(e => e.Institution, "IX_Teachers_Institution");
+            entity.HasIndex(e => e.PhoneNumber, "UQ_Teachers_PhoneNumber").IsUnique();
             entity.HasIndex(e => e.UserId, "UQ_Teachers_UserId").IsUnique();
         });
 

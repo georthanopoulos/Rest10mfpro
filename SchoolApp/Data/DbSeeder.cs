@@ -67,7 +67,8 @@ public class DbSeeder
             Firstname = "System",
             Lastname = "Administrator",
             Role = adminRole,
-            Status = AccountStatus.Active
+            Status = AccountStatus.Active,
+            MustChangePassword = true
         };
 
         _context.Users.Add(adminUser);
