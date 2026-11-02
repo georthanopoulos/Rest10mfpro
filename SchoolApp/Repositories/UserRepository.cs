@@ -3,7 +3,7 @@ using SchoolApp.Core;
 using SchoolApp.Data;
 using SchoolApp.Models;
 using System.Linq.Expressions;
-using System.Reflection.Metadata.Ecma335;
+
 
 namespace SchoolApp.Repositories;
 
@@ -56,5 +56,10 @@ public class UserRepository : BaseRepository<User>, IUserRepository       // fir
         return await _context.Users
             .Include(u => u.Role)
             .FirstOrDefaultAsync(u => u.Id == id);
+    }
+
+    public async Task<bool> UsernameOrEmailExistsAsync(string username, string email)
+    {
+        return await _context.Users.AnyAsync(u => u.Username == username || u.Email == email);
     }
 }

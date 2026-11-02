@@ -14,6 +14,10 @@ public class UnitOfWork : IUnitOfWork
 
     public ICourseRepository CourseRepository { get; }
 
+    public IRoleRepository RoleRepository { get; }
+
+    public IActivationTokenRepository ActivationTokenRepository { get; }
+
     public UnitOfWork(SchoolRest10Context context)
     {
         _context = context;
@@ -21,6 +25,8 @@ public class UnitOfWork : IUnitOfWork
         StudentRepository = new StudentRepository(context);
         TeacherRepository = new TeacherRepository(context);
         CourseRepository = new CourseRepository(context);
+        RoleRepository = new RoleRepository(context);
+        ActivationTokenRepository = new ActivationTokenRepository(context);
     }
 
     public async Task<bool> SaveAsync()

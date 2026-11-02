@@ -10,6 +10,10 @@ public interface IUnitOfWork
 
     ICourseRepository CourseRepository { get; }
 
+    IRoleRepository RoleRepository { get; }
+
+    IActivationTokenRepository ActivationTokenRepository { get; }
+
     Task<bool> SaveAsync();
 
 }

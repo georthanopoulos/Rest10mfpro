@@ -35,6 +35,7 @@ namespace SchoolApp
             builder.Services.AddScoped<ITeacherService, TeacherService>();
             builder.Services.AddScoped<IApplicationService, ApplicationService>();
             builder.Services.AddSingleton<IEncryptionUtil,  EncryptionUtil>();
+            builder.Services.AddSingleton<IActivationTokenUtil, ActivationTokenUtil>();
 
             builder.Services.AddScoped<DbSeeder>();                                       // DbSeeder added
 

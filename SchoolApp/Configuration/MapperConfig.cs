@@ -17,5 +17,9 @@ public class MapperConfig : Profile
 
         CreateMap<TeacherSignupDTO, Teacher>();
 
+        CreateMap<TeacherPreRegisterDTO, User>();
+
+        CreateMap<TeacherPreRegisterDTO, Teacher>();
+
     }
 }
