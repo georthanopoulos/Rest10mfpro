@@ -9,6 +9,7 @@ using SchoolApp.Repositories;
 using SchoolApp.Security;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 
@@ -21,15 +22,17 @@ public class UserService : IUserService
     private IMapper _mapper;
     private readonly ILogger<UserService> _logger;
     private readonly IConfiguration _configuration;
+    private readonly IActivationTokenUtil _activationTokenUtil;
 
     public UserService(IEncryptionUtil encryptionUtil, IUnitOfWork unitOfWork,
-        IMapper mapper, ILogger<UserService> logger, IConfiguration configuration)
+        IMapper mapper, ILogger<UserService> logger, IConfiguration configuration, IActivationTokenUtil activationTokenUtil)
     {
         _encryptionUtil = encryptionUtil;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
         _configuration = configuration;
+        _activationTokenUtil = activationTokenUtil;
     }
 
     public async Task<PaginatedResult<UserReadOnlyDTO>> GetPaginatedUsersFilteredAsync(int pageNumber, int pageSize,
@@ -82,7 +85,7 @@ public class UserService : IUserService
 
         if (user is null)
         {
-            throw new EntityNotFoundException("User", "Enity not found.");
+            throw new EntityNotFoundException("User", "Entity not found.");
         }
 
         _logger.LogInformation("User found with username={Username}", username);
@@ -107,12 +110,38 @@ public class UserService : IUserService
     {
         User? user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(credentials.Username!);
 
-        if (user is null || !_encryptionUtil.IsValidPassword(credentials.Password!, user.Password))
+        if (user is null
+            || user.Status != AccountStatus.Active
+            || user.Password is null
+            || !_encryptionUtil.IsValidPassword(credentials.Password!, user.Password))
         {
             throw new EntityNotAuthorizedException("Auth", "Bad Credentials");
         }
         _logger.LogInformation("User with username={Username} verified for login.", credentials.Username);
         return user;
+    }
+
+    public async Task ActivateAccountAsync(ActivateAccountDTO request)
+    {
+        string tokenHash = _activationTokenUtil.Hash(request.Token!);
+
+        ActivationToken? activationToken = await _unitOfWork.ActivationTokenRepository.GetByHashAsync(tokenHash);
+
+        if (activationToken is null
+            || activationToken.UsedAt is not null
+            || activationToken.ExpiresAt < DateTime.UtcNow
+            || activationToken.User.Status != AccountStatus.Pending)
+        {
+            throw new InvalidArgumentException("ActivationToken", "Invalid or expired activation token.");
+        }
+
+        activationToken.User.Password = _encryptionUtil.Encrypt(request.Password!);
+        activationToken.User.Status = AccountStatus.Active;
+        activationToken.UsedAt = DateTime.UtcNow;
+
+        await _unitOfWork.SaveAsync();
+
+        _logger.LogInformation("User with id={Id} activated the account.", activationToken.User.Id);
     }
 
     public string CreateUserToken(User user)

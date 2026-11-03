@@ -17,26 +17,26 @@ public class TeachersController : ControllerBase
     }
 
     /// <summary>
-    /// Registers a new Teacher and User account
+    /// Pre-registers a new Teacher and User account
     /// </summary>
-    /// <param name="teacherSignupDTO"></param>
-    /// <returns></returns>
+    /// <param name="teacherPreRegisterDTO"></param>
+    /// <returns>Activation Token</returns>
     [HttpPost]
     [Authorize(Policy = "INSERT_TEACHER")]
-    [ProducesResponseType(typeof(UserReadOnlyDTO), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(PreRegistrationResultDTO), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<UserReadOnlyDTO>> RegisterTeacher(
-       [FromBody] TeacherSignupDTO teacherSignupDTO)                             // [FromBody] -> is by default but just for readability purposes
+    public async Task<ActionResult<PreRegistrationResultDTO>> PreRegisterTeacher(
+       [FromBody] TeacherPreRegisterDTO teacherPreRegisterDTO)                             // [FromBody] -> is by default but just for readability purposes
     {
-        var createdUser = await _applicationService.TeacherService.SignUpUserAsync(teacherSignupDTO);
+        var result = await _applicationService.TeacherService.PreRegisterAsync(teacherPreRegisterDTO);
 
         return CreatedAtAction(
             actionName: nameof(UsersController.GetUserById),
             controllerName: "Users",
-            routeValues: new { id = createdUser.Id },
-            value: createdUser);
+            routeValues: new { id = result.User.Id },
+            value: result);
     }
 }
