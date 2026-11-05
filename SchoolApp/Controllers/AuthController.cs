@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SchoolApp.DTO;
 using SchoolApp.Exceptions;
 using SchoolApp.Services;
@@ -35,4 +36,17 @@ public class AuthController : ControllerBase
 
         return Ok(new JwtTokenDTO(token));
     }
+
+    [HttpPost("activate")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> Activate(
+        [FromBody] ActivateAccountDTO activateAccountDTO) 
+    {
+        await _applicationService.UserService.ActivateAccountAsync(activateAccountDTO);
+
+        return NoContent();
+    }
+
 }

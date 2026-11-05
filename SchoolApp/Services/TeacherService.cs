@@ -10,46 +10,20 @@ namespace SchoolApp.Services;
 public class TeacherService : ITeacherService
 {
 
-    private readonly IEncryptionUtil _encryptionUtil;
     private readonly IActivationTokenUtil _activationTokenUtil;
     private readonly IUnitOfWork _unitOfWork;
     private IMapper _mapper;
     private readonly ILogger<TeacherService> _logger;
 
-    public TeacherService(IEncryptionUtil encryptionUtil, IActivationTokenUtil activationTokenUtil,
+    public TeacherService(IActivationTokenUtil activationTokenUtil,
         IUnitOfWork unitOfWork, IMapper mapper, ILogger<TeacherService> logger)
     {
-        _encryptionUtil = encryptionUtil;
         _activationTokenUtil = activationTokenUtil;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
     }
 
-    public async Task<UserReadOnlyDTO> SignUpUserAsync(TeacherSignupDTO teacherSignupDTO)
-    {
-        Teacher teacher = _mapper.Map<Teacher>(teacherSignupDTO);
-        User user = _mapper.Map<User>(teacherSignupDTO);
-
-        User? existingUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.Username);
-
-         if (existingUser is not null)
-         {
-                throw new EntityAlreadyExistsException("User", "User already exists.");
-         }
-
-         user.Teacher = teacher;
-         user.Password = _encryptionUtil.Encrypt(user.Password);
-
-         await _unitOfWork.UserRepository.AddAsync(user);
-         await _unitOfWork.TeacherRepository.AddAsync(teacher);
-
-         await _unitOfWork.SaveAsync();
-         _logger.LogInformation("Teacher with id={Id} signed up successfully", teacher.Id);
-
-        return _mapper.Map<UserReadOnlyDTO>(user);
-      
-    }
 
     public async Task<PreRegistrationResultDTO> PreRegisterAsync(TeacherPreRegisterDTO request)
     {
