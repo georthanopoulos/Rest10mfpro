@@ -33,6 +33,7 @@ namespace SchoolApp
             builder.Services.AddRepositories();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITeacherService, TeacherService>();
+            builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddScoped<IApplicationService, ApplicationService>();
             builder.Services.AddSingleton<IEncryptionUtil,  EncryptionUtil>();
             builder.Services.AddSingleton<IActivationTokenUtil, ActivationTokenUtil>();
@@ -106,6 +107,7 @@ namespace SchoolApp
             {
                 options.AddPolicy("VIEW_USERS", p => p.RequireClaim("Capability", "VIEW_USERS"));
                 options.AddPolicy("INSERT_TEACHER", p => p.RequireClaim("Capability", "INSERT_TEACHER"));
+                options.AddPolicy("INSERT_STUDENT", p => p.RequireClaim("Capability", "INSERT_STUDENT"));
             });
 
             // END of Service registration area (above). Container configs. No object has beed created yet!!!!
