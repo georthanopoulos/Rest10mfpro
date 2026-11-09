@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using SchoolApp.Core;
+using SchoolApp.Core.Filters;
 using SchoolApp.DTO;
 using SchoolApp.Exceptions;
 using SchoolApp.Models;
@@ -78,5 +80,10 @@ public class TeacherService : ITeacherService
             ActivationToken = rawToken,
             ExpiresAt = activationToken.ExpiresAt
         };
+    }
+
+    public Task<PaginatedResult<TeacherReadOnlyDTO>> GetPaginatedTeachersFilteredAsync(int pageNumber, int pageSize, TeacherFiltersDTO filters)
+    {
+        throw new NotImplementedException();
     }
 }
