@@ -6,6 +6,7 @@ using SchoolApp.Exceptions;
 using SchoolApp.Models;
 using SchoolApp.Repositories;
 using SchoolApp.Security;
+using System.Linq.Expressions;
 
 namespace SchoolApp.Services;
 
@@ -82,8 +83,42 @@ public class TeacherService : ITeacherService
         };
     }
 
-    public Task<PaginatedResult<TeacherReadOnlyDTO>> GetPaginatedTeachersFilteredAsync(int pageNumber, int pageSize, TeacherFiltersDTO filters)
+    public async Task<PaginatedResult<TeacherReadOnlyDTO>> GetPaginatedTeachersFilteredAsync(int pageNumber,
+        int pageSize, TeacherFiltersDTO teacherFiltersDTO)
     {
-        throw new NotImplementedException();
+        List<Expression<Func<User, bool>>> predicates = [];
+
+        if (!string.IsNullOrEmpty(teacherFiltersDTO.Username))
+        {
+            predicates.Add(u => u.Username == teacherFiltersDTO.Username);
+        }
+
+        if (!string.IsNullOrEmpty(teacherFiltersDTO.Email))
+        {
+            predicates.Add(u => u.Email == teacherFiltersDTO.Email);
+        }
+
+        if (!string.IsNullOrEmpty(teacherFiltersDTO.Lastname))
+        {
+            predicates.Add(u => u.Lastname == teacherFiltersDTO.Lastname);
+        }
+
+        if (!string.IsNullOrEmpty(teacherFiltersDTO.Institution))
+        {
+            predicates.Add(u => u.Teacher!.Institution == teacherFiltersDTO.Institution);
+        }
+
+        var paginatedResult = await _unitOfWork.TeacherRepository.GetPaginatedUsersTeachersAsync(pageNumber, pageSize, predicates);
+
+        var dtoResult = new PaginatedResult<TeacherReadOnlyDTO>()
+        {
+            Data = _mapper.Map<List<TeacherReadOnlyDTO>>(paginatedResult.Data),
+            TotalRecords = paginatedResult.TotalRecords,
+            PageNumber = paginatedResult.PageNumber,
+            PageSize = paginatedResult.PageSize
+        };
+
+        _logger.LogInformation("Retrieved {Count} teachers", dtoResult.Data.Count);
+        return dtoResult;
     }
 }
