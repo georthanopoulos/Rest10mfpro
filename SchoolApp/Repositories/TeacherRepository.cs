@@ -60,4 +60,11 @@ public class TeacherRepository : BaseRepository<Teacher>, ITeacherRepository
 
         return courses;
     }
+
+    public override async Task<Teacher?> GetAsync(int id)
+    {
+        return await _context.Teachers
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.Id == id);
+    }
 }

@@ -15,10 +15,17 @@ public class MapperConfig : Profile
         CreateMap<TeacherPreRegisterDTO, User>();
 
         CreateMap<User, TeacherReadOnlyDTO>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Teacher.Id))
-            .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Teacher.PhoneNumber))
-            .ForMember(dest => dest.Institution, opt => opt.MapFrom(src => src.Teacher.Institution))
-            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Teacher.UserId));
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Teacher!.Id))
+            .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Teacher!.PhoneNumber))
+            .ForMember(dest => dest.Institution, opt => opt.MapFrom(src => src.Teacher!.Institution))
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Teacher!.UserId));
+
+        CreateMap<Teacher, TeacherReadOnlyDTO>()
+            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.Username))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
+            .ForMember(dest => dest.Firstname, opt => opt.MapFrom(src => src.User.Firstname))
+            .ForMember(dest => dest.Lastname, opt => opt.MapFrom(src => src.User.Lastname));
+
 
         CreateMap<TeacherPreRegisterDTO, Teacher>();
 

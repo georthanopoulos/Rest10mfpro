@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using SchoolApp.Core;
 using SchoolApp.Core.Filters;
 using SchoolApp.DTO;
+using SchoolApp.Exceptions;
 using SchoolApp.Services;
+using System.Security.Claims;
 
 namespace SchoolApp.Controllers;
 
@@ -66,6 +68,31 @@ public class TeachersController : ControllerBase
             .GetPaginatedTeachersFilteredAsync(pageNumber, pageSize, teacherFiltersDTO ?? new TeacherFiltersDTO());
 
         return Ok(result);
+    }
+
+    [HttpGet("{id:int}")]
+    [Authorize]
+    [ProducesResponseType(typeof(TeacherReadOnlyDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<TeacherReadOnlyDTO>> GetTeacherById(int id)
+    {
+        var teacher = await _applicationService.TeacherService.GetTeacherByIdAsync(id);
+
+        // 1. Το id του χρήστη από το token:
+        int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out int currentUserId);
+
+        // 2. Είναι το δικό του προφίλ;
+        bool isOwnProfile = /* ... */;
+
+        // 3. Έχει δικαίωμα;
+        if (!(isOwnProfile || User.HasClaim("Capability", "VIEW_TEACHER")))
+        {
+            throw new EntityForbiddenException(/* ... */);
+        }
+
+        return Ok(teacher);
     }
 
 }

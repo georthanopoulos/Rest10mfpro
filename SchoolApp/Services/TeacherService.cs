@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using SchoolApp.Core;
 using SchoolApp.Core.Filters;
 using SchoolApp.DTO;
@@ -6,6 +7,7 @@ using SchoolApp.Exceptions;
 using SchoolApp.Models;
 using SchoolApp.Repositories;
 using SchoolApp.Security;
+using Serilog.Sinks.SystemConsole.Themes;
 using System.Linq.Expressions;
 
 namespace SchoolApp.Services;
@@ -120,5 +122,19 @@ public class TeacherService : ITeacherService
 
         _logger.LogInformation("Retrieved {Count} teachers", dtoResult.Data.Count);
         return dtoResult;
+    }
+
+    public async Task<TeacherReadOnlyDTO> GetTeacherByIdAsync(int id)
+    {
+        Teacher? teacher = await _unitOfWork.TeacherRepository.GetAsync(id);
+
+        if (teacher == null)
+        {
+            throw new EntityNotFoundException("Teacher", $"Teacher with id={id} not found.");
+        }
+
+        _logger.LogInformation("Teacher with id={id} was successfully found.", id);
+
+        return _mapper.Map<TeacherReadOnlyDTO>(teacher);    
     }
 }
