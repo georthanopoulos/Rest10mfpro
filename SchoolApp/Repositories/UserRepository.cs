@@ -60,11 +60,11 @@ public class UserRepository : BaseRepository<User>, IUserRepository       // fir
 
     public async Task<bool> UsernameOrEmailExistsAsync(string username, string email)
     {
-        return await _context.Users.AnyAsync(u => u.Username == username || u.Email == email);
+        return await _context.Users.IgnoreQueryFilters().AnyAsync(u => u.Username == username || u.Email == email);
     }
 
     public async Task<User?> GetByEmailAsync(string email)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        return await _context.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Email == email);
     }
 }

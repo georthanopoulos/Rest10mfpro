@@ -14,4 +14,6 @@ public interface ITeacherService
     Task<TeacherReadOnlyDTO> GetTeacherByIdAsync(int id);
 
     Task<TeacherReadOnlyDTO> UpdateTeacherAsync(int id, TeacherUpdateDTO request);
+
+    Task DeleteTeacherAsync(int id);
 }

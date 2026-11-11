@@ -14,6 +14,7 @@ public class StudentRepository : BaseRepository<Student>, IStudentRepository
     {
         return await _context.Students
             .Where(s => s.Am == am)
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync();
     }
 

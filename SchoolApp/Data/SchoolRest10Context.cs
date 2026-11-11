@@ -38,6 +38,8 @@ public class SchoolRest10Context : DbContext
             entity.HasIndex(e => e.Institution, "IX_Teachers_Institution");
             entity.HasIndex(e => e.PhoneNumber, "UQ_Teachers_PhoneNumber").IsUnique();
             entity.HasIndex(e => e.UserId, "UQ_Teachers_UserId").IsUnique();
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
         });
 
         modelBuilder.Entity<Student>(entity =>
@@ -54,6 +56,8 @@ public class SchoolRest10Context : DbContext
             entity.HasIndex(e => e.Am, "UQ_Students_Am").IsUnique();
             entity.HasIndex(e => e.Institution, "IX_Students_Institution");
             entity.HasIndex(e => e.UserId, "UQ_Students_UserId").IsUnique();
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
         });
 
         modelBuilder.Entity<Course>(entity =>
@@ -156,6 +160,8 @@ public class SchoolRest10Context : DbContext
             entity.HasIndex(e => e.Email, "UQ_Users_Email").IsUnique();
             entity.HasIndex(e => e.RoleId, "IX_Users_RoleId");
             entity.HasIndex(e => e.Username, "UQ_Users_Username").IsUnique();
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
         });
 
         modelBuilder.Entity<ActivationToken>(entity =>
@@ -169,6 +175,8 @@ public class SchoolRest10Context : DbContext
 
             entity.HasIndex(e => e.TokenHash, "UQ_ActivationTokens_TokenHash").IsUnique();
             entity.HasIndex(e => e.UserId, "IX_ActivationTokens_UserId");
+
+            entity.HasQueryFilter(t => !t.User.IsDeleted);
 
         });
     }

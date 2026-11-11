@@ -16,6 +16,7 @@ public class TeacherRepository : BaseRepository<Teacher>, ITeacherRepository
     {
         return await _context.Teachers
             .Where(t => t.PhoneNumber == phoneNumber)
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync();
     }
 

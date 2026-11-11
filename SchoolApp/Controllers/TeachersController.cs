@@ -107,4 +107,15 @@ public class TeachersController : ControllerBase
         return Ok(updated);
     }
 
+    [HttpDelete("{id:int}")]
+    [Authorize(Policy = "DELETE_TEACHER")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> DeleteTeacher(int id)
+    {
+        await _applicationService.TeacherService.DeleteTeacherAsync(id);
+        return NoContent();
+    }
 }

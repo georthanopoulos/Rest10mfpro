@@ -178,4 +178,26 @@ public class TeacherService : ITeacherService
         return _mapper.Map<TeacherReadOnlyDTO>(teacher);
 
     }
+
+    public async Task DeleteTeacherAsync(int id)
+    {
+        Teacher? teacher = await _unitOfWork.TeacherRepository.GetAsync(id);
+
+        if (teacher == null)
+        {
+            throw new EntityNotFoundException("Teacher", $"Teacher with id={id} not found.");
+        }
+
+        var now = DateTime.UtcNow;
+
+        teacher.IsDeleted = true;
+        teacher.DeletedAt = now;
+
+        teacher.User.IsDeleted = true;
+        teacher.User.DeletedAt = now;
+
+        await _unitOfWork.SaveAsync();
+
+        _logger.LogInformation("Teacher with id={id} has been deleted successfully", id);
+    }
 }
