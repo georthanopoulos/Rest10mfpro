@@ -80,19 +80,31 @@ public class TeachersController : ControllerBase
     {
         var teacher = await _applicationService.TeacherService.GetTeacherByIdAsync(id);
 
-        // 1. Το id του χρήστη από το token:
         int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out int currentUserId);
 
-        // 2. Είναι το δικό του προφίλ;
-        bool isOwnProfile = /* ... */;
+        bool isOwnProfile = teacher.UserId == currentUserId;
 
-        // 3. Έχει δικαίωμα;
         if (!(isOwnProfile || User.HasClaim("Capability", "VIEW_TEACHER")))
         {
-            throw new EntityForbiddenException(/* ... */);
+            throw new EntityForbiddenException("Teacher", "You do not have permission to view this teacher.");
         }
 
         return Ok(teacher);
+    }
+
+    [HttpPut("{id:int}")]
+    [Authorize(Policy = "EDIT_TEACHER")]
+    [ProducesResponseType(typeof(TeacherReadOnlyDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<TeacherReadOnlyDTO>> UpdateTeacher(int id,
+        [FromBody] TeacherUpdateDTO request)
+    {
+        var updated = await _applicationService.TeacherService.UpdateTeacherAsync(id, request);
+        return Ok(updated);
     }
 
 }

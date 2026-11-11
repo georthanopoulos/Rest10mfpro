@@ -11,5 +11,7 @@ public interface ITeacherService
     Task<PaginatedResult<TeacherReadOnlyDTO>> GetPaginatedTeachersFilteredAsync(int pageNumber,
         int pageSize, TeacherFiltersDTO filters);
     
-    Task<TeacherReadOnlyDTO> GetTeacherByIdAsync(int id); 
+    Task<TeacherReadOnlyDTO> GetTeacherByIdAsync(int id);
+
+    Task<TeacherReadOnlyDTO> UpdateTeacherAsync(int id, TeacherUpdateDTO request);
 }

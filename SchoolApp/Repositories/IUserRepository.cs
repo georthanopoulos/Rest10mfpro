@@ -1,4 +1,5 @@
-﻿using SchoolApp.Core;
+﻿using Microsoft.EntityFrameworkCore;
+using SchoolApp.Core;
 using SchoolApp.Models;
 using System.Linq.Expressions;
 
@@ -11,4 +12,6 @@ public interface IUserRepository : IBaseRepository<User>
     Task<PaginatedResult<User>> GetUsersAsync(int pageNumber, int pageSize, List<Expression<Func<User, bool>>> predicates);
 
     Task<bool> UsernameOrEmailExistsAsync(string username, string email);
+
+    Task<User?> GetByEmailAsync(string email);
 }

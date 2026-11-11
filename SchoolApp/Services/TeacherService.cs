@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SchoolApp.Core;
 using SchoolApp.Core.Filters;
@@ -8,6 +9,7 @@ using SchoolApp.Models;
 using SchoolApp.Repositories;
 using SchoolApp.Security;
 using Serilog.Sinks.SystemConsole.Themes;
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 
 namespace SchoolApp.Services;
@@ -136,5 +138,44 @@ public class TeacherService : ITeacherService
         _logger.LogInformation("Teacher with id={id} was successfully found.", id);
 
         return _mapper.Map<TeacherReadOnlyDTO>(teacher);    
+    }
+
+    public async Task<TeacherReadOnlyDTO> UpdateTeacherAsync(int id, TeacherUpdateDTO request)
+    {
+        Teacher? teacher = await _unitOfWork.TeacherRepository.GetAsync(id);
+
+        if (teacher == null)
+        {
+            throw new EntityNotFoundException("Teacher", $"Teacher with id={id} not found.");
+        }
+
+        User? userWithEmail = await _unitOfWork.UserRepository.GetByEmailAsync(request.Email!);
+
+        if (userWithEmail != null && userWithEmail.Id != teacher.UserId) 
+        {
+            throw new EntityAlreadyExistsException("User", "A user with this email already exists.");
+        }
+
+        Teacher? teacherWithPhone = await _unitOfWork.TeacherRepository.GetByPhoneNumberAsync(request.PhoneNumber!);
+
+
+        if (teacherWithPhone != null && teacherWithPhone.Id != teacher.Id)
+        {
+            throw new EntityAlreadyExistsException("Teacher", "A teacher with this phone number already exists.");
+        }
+
+        teacher.User.Email = request.Email!;
+        teacher.User.Firstname = request.Firstname!;
+        teacher.User.Lastname = request.Lastname!;
+
+        teacher.PhoneNumber = request.PhoneNumber!;
+        teacher.Institution = request.Institution!;
+
+
+        await _unitOfWork.SaveAsync();
+
+        _logger.LogInformation("Teacher with id={id} was successfully updated.", id);
+        return _mapper.Map<TeacherReadOnlyDTO>(teacher);
+
     }
 }
