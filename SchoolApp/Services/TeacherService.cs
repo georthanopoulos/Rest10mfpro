@@ -88,28 +88,28 @@ public class TeacherService : ITeacherService
     }
 
     public async Task<PaginatedResult<TeacherReadOnlyDTO>> GetPaginatedTeachersFilteredAsync(int pageNumber,
-        int pageSize, TeacherFiltersDTO teacherFiltersDTO)
+        int pageSize, TeacherFiltersDTO filters)
     {
         List<Expression<Func<User, bool>>> predicates = [];
 
-        if (!string.IsNullOrEmpty(teacherFiltersDTO.Username))
+        if (!string.IsNullOrEmpty(filters.Username))
         {
-            predicates.Add(u => u.Username == teacherFiltersDTO.Username);
+            predicates.Add(u => u.Username == filters.Username);
         }
 
-        if (!string.IsNullOrEmpty(teacherFiltersDTO.Email))
+        if (!string.IsNullOrEmpty(filters.Email))
         {
-            predicates.Add(u => u.Email == teacherFiltersDTO.Email);
+            predicates.Add(u => u.Email == filters.Email);
         }
 
-        if (!string.IsNullOrEmpty(teacherFiltersDTO.Lastname))
+        if (!string.IsNullOrEmpty(filters.Lastname))
         {
-            predicates.Add(u => u.Lastname == teacherFiltersDTO.Lastname);
+            predicates.Add(u => u.Lastname == filters.Lastname);
         }
 
-        if (!string.IsNullOrEmpty(teacherFiltersDTO.Institution))
+        if (!string.IsNullOrEmpty(filters.Institution))
         {
-            predicates.Add(u => u.Teacher!.Institution == teacherFiltersDTO.Institution);
+            predicates.Add(u => u.Teacher!.Institution == filters.Institution);
         }
 
         var paginatedResult = await _unitOfWork.TeacherRepository.GetPaginatedUsersTeachersAsync(pageNumber, pageSize, predicates);

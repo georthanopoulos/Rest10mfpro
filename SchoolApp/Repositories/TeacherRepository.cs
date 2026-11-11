@@ -20,10 +20,11 @@ public class TeacherRepository : BaseRepository<Teacher>, ITeacherRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<PaginatedResult<User>> GetPaginatedUsersTeachersAsync(int pageNumber, int pageSize, List<Expression<Func<User, bool>>> predicates)
+    public async Task<PaginatedResult<User>> GetPaginatedUsersTeachersAsync(int pageNumber, int pageSize,
+        List<Expression<Func<User, bool>>> predicates)
     {
         IQueryable<User> query = _context.Users   
-            .Include(u => u.Teacher)
+            .Include(u => u.Teacher)                     // only for users that are teachers!
             .Where(u => u.Teacher != null);
 
         if (predicates is not null && predicates.Count > 0)
@@ -34,18 +35,18 @@ public class TeacherRepository : BaseRepository<Teacher>, ITeacherRepository
             }
         }
 
-        int totalRecords = await query.CountAsync();                                                       // is being executed
+        int totalRecords = await query.CountAsync();          // is being executed
 
         if (pageNumber < 1) pageNumber = 1;
         if (pageSize < 1) pageSize = 10;
         
-        int skip = (pageNumber - 1) * pageSize;      // number of pages we skip. pageNumber - 1 beacause in Db it starts.
+        int skip = (pageNumber - 1) * pageSize;      // number of pages we skip. pageNumber - 1 because in Db it starts.
                                                      // from 0. it works as offset.
         var data = await query
             .OrderBy(u => u.Id)                 // Paginated always with OrderBy BEFORE skip !!!!
             .Skip(skip)
             .Take(pageSize)
-            .ToListAsync();                                                                          // is being executed
+            .ToListAsync();                             // is being executed
 
         return new PaginatedResult<User>(data, totalRecords, pageNumber, pageSize);
     }

@@ -36,32 +36,32 @@ public class UserService : IUserService
     }
 
     public async Task<PaginatedResult<UserReadOnlyDTO>> GetPaginatedUsersFilteredAsync(int pageNumber, int pageSize,
-        UserFiltersDTO userFiltersDTO)
+        UserFiltersDTO filters)
     {
 
         List<Expression<Func<User, bool>>> predicates = [];
 
-        if (!string.IsNullOrEmpty(userFiltersDTO.Username))
+        if (!string.IsNullOrEmpty(filters.Username))
         {
-            predicates.Add(u => u.Username == userFiltersDTO.Username);
+            predicates.Add(u => u.Username == filters.Username);
         }
 
-        if (!string.IsNullOrEmpty(userFiltersDTO.Email))
+        if (!string.IsNullOrEmpty(filters.Email))
         {
-            predicates.Add(u => u.Email == userFiltersDTO.Email);
+            predicates.Add(u => u.Email == filters.Email);
         }
 
-        if (!string.IsNullOrEmpty(userFiltersDTO.UserRole))
+        if (!string.IsNullOrEmpty(filters.UserRole))
         {
             string[] validRoles = { "ADMIN", "EMPLOYEE", "TEACHER", "STUDENT" };
 
-            if (!validRoles.Contains(userFiltersDTO.UserRole))
+            if (!validRoles.Contains(filters.UserRole))
             { 
                 throw new InvalidArgumentException("UserRole",
-                    $"Unknown role '{userFiltersDTO.UserRole}'. Valid roles: {string.Join(", ", validRoles)}.");
+                    $"Unknown role '{filters.UserRole}'. Valid roles: {string.Join(", ", validRoles)}.");
             }
 
-            predicates.Add(u => u.Role.Name == userFiltersDTO.UserRole);
+            predicates.Add(u => u.Role.Name == filters.UserRole);
         }
 
         var paginatedResult = await _unitOfWork.UserRepository.GetUsersAsync(pageNumber, pageSize, predicates);

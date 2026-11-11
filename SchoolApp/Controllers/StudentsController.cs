@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SchoolApp.Core;
+using SchoolApp.Core.Filters;
 using SchoolApp.DTO;
 using SchoolApp.Services;
 
@@ -38,5 +40,32 @@ public class StudentsController : ControllerBase
             controllerName: "Users",
             routeValues: new { id = result.User.Id },
             value: result);
+    }
+
+    /// <summary>
+    /// Gets a paginated list of students with optional filtering.
+    /// </summary>
+    /// <param name="pageNumber">The page number (1-based). Default is 1.</param>
+    /// <param name="pageSize">The number of items per page. Default is 10.</param>
+    /// <param name="filters">Optional filters for username, email, lastname, am and institution.</param>
+    /// <returns>A paginated list of students matching the filters.</returns>
+    /// <response code="200">Returns the paginated student list.</response>
+    /// <response code="401">If the request is not authenticated.</response>
+    /// <response code="403">If the user lacks permission to list students.</response>
+    [HttpGet]
+    [Authorize(Policy = "VIEW_STUDENTS")]
+    [ProducesResponseType(typeof(PaginatedResult<StudentReadOnlyDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<PaginatedResult<StudentReadOnlyDTO>>> GetStudents (
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] StudentFiltersDTO? filters = null)
+    {
+        var result = await _applicationService.StudentService
+            .GetPaginatedStudentsFilteredAsync(pageNumber, pageSize, filters ?? new StudentFiltersDTO());
+
+        return Ok(result);
+
     }
 }

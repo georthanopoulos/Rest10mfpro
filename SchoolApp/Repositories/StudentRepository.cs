@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SchoolApp.Core;
 using SchoolApp.Data;
 using SchoolApp.Models;
+using System.Linq.Expressions;
 
 namespace SchoolApp.Repositories;
 
@@ -28,5 +30,36 @@ public class StudentRepository : BaseRepository<Student>, IStudentRepository
             .ToListAsync();
 
         return courses;
+    }
+
+    public async Task<PaginatedResult<User>> GetPaginatedUsersStudentsAsync(int pageNumber, int pageSize,
+        List<Expression<Func<User, bool>>> predicates)
+    {
+        IQueryable<User> query = _context.Users
+            .Include(u => u.Student)                     // only for users that are students!
+            .Where(u => u.Student != null);
+
+        if (predicates is not null && predicates.Count > 0)
+        {
+            foreach (var predicate in predicates)
+            {
+                query = query.Where(predicate);                // AND is implied here.
+            }
+        }
+
+        int totalRecords = await query.CountAsync();          // is being executed
+
+        if (pageNumber < 1) pageNumber = 1;
+        if (pageSize < 1) pageSize = 10;
+
+        int skip = (pageNumber - 1) * pageSize;      // number of pages we skip. pageNumber - 1 because in Db it starts.
+                                                     // from 0. it works as offset.
+        var data = await query
+            .OrderBy(u => u.Id)                 // Paginated always with OrderBy BEFORE skip !!!!
+            .Skip(skip)
+            .Take(pageSize)
+            .ToListAsync();                           // is being executed
+
+        return new PaginatedResult<User>(data, totalRecords, pageNumber, pageSize);
     }
 }

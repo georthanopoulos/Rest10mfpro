@@ -14,7 +14,7 @@ public interface IUserService
     Task<UserReadOnlyDTO> GetUserByIdAsync (int id);
 
     Task<PaginatedResult<UserReadOnlyDTO>> GetPaginatedUsersFilteredAsync(int pageNumber, int pageSize,
-        UserFiltersDTO userFiltersDTO);
+        UserFiltersDTO filters);
 
     Task ActivateAccountAsync(ActivateAccountDTO request);
 

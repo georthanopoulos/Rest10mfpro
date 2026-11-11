@@ -33,5 +33,18 @@ public class MapperConfig : Profile
 
         CreateMap<StudentPreRegisterDTO, Student>();
 
+        CreateMap<User, StudentReadOnlyDTO>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Student!.Id))
+            .ForMember(dest => dest.Am, opt => opt.MapFrom(src => src.Student!.Am))
+            .ForMember(dest => dest.Institution, opt => opt.MapFrom(src => src.Student!.Institution))
+            .ForMember(dest => dest.Department, opt => opt.MapFrom(src => src.Student!.Department))
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id));
+
+        CreateMap<Student, StudentReadOnlyDTO>()
+            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.Username))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
+            .ForMember(dest => dest.Firstname, opt => opt.MapFrom(src => src.User.Firstname))
+            .ForMember(dest => dest.Lastname, opt => opt.MapFrom(src => src.User.Lastname));
+
     }
 }

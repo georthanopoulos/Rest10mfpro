@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using SchoolApp.Core;
+using SchoolApp.Core.Filters;
 using SchoolApp.DTO;
 using SchoolApp.Exceptions;
 using SchoolApp.Models;
 using SchoolApp.Repositories;
 using SchoolApp.Security;
+using System.Linq.Expressions;
 
 namespace SchoolApp.Services;
 
@@ -76,5 +79,49 @@ public class StudentService : IStudentService
             ActivationToken = rawToken,
             ExpiresAt = activationToken.ExpiresAt
         };
+    }
+
+    public async Task<PaginatedResult<StudentReadOnlyDTO>> GetPaginatedStudentsFilteredAsync(int pageNumber,
+        int pageSize, StudentFiltersDTO filters)
+    {
+        List<Expression<Func<User, bool>>> predicates = [];
+
+        if (!string.IsNullOrEmpty(filters.Username))
+        {
+            predicates.Add(u => u.Username == filters.Username);
+        }
+
+        if (!string.IsNullOrEmpty(filters.Email))
+        {
+            predicates.Add(u => u.Email == filters.Email);
+        }
+
+        if (!string.IsNullOrEmpty(filters.Lastname))
+        {
+            predicates.Add(u => u.Lastname == filters.Lastname);
+        }
+
+        if (!string.IsNullOrEmpty(filters.Am))
+        {
+            predicates.Add(u => u.Student!.Am == filters.Am);
+        }
+
+        if (!string.IsNullOrEmpty(filters.Institution))
+        {
+            predicates.Add(u => u.Student!.Institution == filters.Institution);
+        }
+
+        var paginatedResult = await _unitOfWork.StudentRepository.GetPaginatedUsersStudentsAsync(pageNumber, pageSize, predicates);
+
+        var dtoResult = new PaginatedResult<StudentReadOnlyDTO>()
+        {
+            Data = _mapper.Map<List<StudentReadOnlyDTO>>(paginatedResult.Data),
+            TotalRecords = paginatedResult.TotalRecords,
+            PageNumber = paginatedResult.PageNumber,
+            PageSize = paginatedResult.PageSize
+        };
+
+        _logger.LogInformation("Retrieved {Count} students", dtoResult.Data.Count);
+        return dtoResult;
     }
 }

@@ -49,7 +49,7 @@ public class TeachersController : ControllerBase
     /// </summary>
     /// <param name="pageNumber">The page number (1-based). Default is 1.</param>
     /// <param name="pageSize">The number of items per page. Default is 10.</param>
-    /// <param name="teacherFiltersDTO">Optional filters for username, email, lastname and institution.</param>
+    /// <param name="filters">Optional filters for username, email, lastname and institution.</param>
     /// <returns>A paginated list of teaches matching the filters.</returns>
     /// <response code="200">Returns the paginated teacher list.</response>
     /// <response code="401">If the request is not authenticated.</response>
@@ -62,10 +62,10 @@ public class TeachersController : ControllerBase
     public async Task<ActionResult<PaginatedResult<TeacherReadOnlyDTO>>> GetTeachers(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
-        [FromQuery] TeacherFiltersDTO? teacherFiltersDTO = null)
+        [FromQuery] TeacherFiltersDTO? filters = null)
     {
         var result = await _applicationService.TeacherService
-            .GetPaginatedTeachersFilteredAsync(pageNumber, pageSize, teacherFiltersDTO ?? new TeacherFiltersDTO());
+            .GetPaginatedTeachersFilteredAsync(pageNumber, pageSize, filters ?? new TeacherFiltersDTO());
 
         return Ok(result);
     }
