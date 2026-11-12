@@ -70,6 +70,16 @@ public class TeachersController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>
+    /// Gets a teacher by id. A teacher can view only their own profile;
+    /// users with the VIEW_TEACHER capability can view any teacher.
+    /// </summary>
+    /// <param name="id">The id of the teacher.</param>
+    /// <returns>The teacher details.</returns>
+    /// <response code="200">Returns the teacher.</response>
+    /// <response code="401">If the request is not authenticated.</response>
+    /// <response code="403">If the user is not allowed to view this teacher.</response>
+    /// <response code="404">If the teacher does not exist.</response>
     [HttpGet("{id:int}")]
     [Authorize]
     [ProducesResponseType(typeof(TeacherReadOnlyDTO), StatusCodes.Status200OK)]
@@ -92,6 +102,18 @@ public class TeachersController : ControllerBase
         return Ok(teacher);
     }
 
+    /// <summary>
+    /// Updates an existing teacher's details (email, firstname, lastname, phone number, institution).
+    /// </summary>
+    /// <param name="id">The id of the teacher to update.</param>
+    /// <param name="request">The new teacher details.</param>
+    /// <returns>The updated teacher.</returns>
+    /// <response code="200">Returns the updated teacher.</response>
+    /// <response code="400">If the request body is invalid.</response>
+    /// <response code="401">If the request is not authenticated.</response>
+    /// <response code="403">If the user lacks permission to edit teachers.</response>
+    /// <response code="404">If the teacher does not exist.</response>
+    /// <response code="409">If the email or phone number is already used by another teacher.</response>
     [HttpPut("{id:int}")]
     [Authorize(Policy = "EDIT_TEACHER")]
     [ProducesResponseType(typeof(TeacherReadOnlyDTO), StatusCodes.Status200OK)]
@@ -107,6 +129,14 @@ public class TeachersController : ControllerBase
         return Ok(updated);
     }
 
+    /// <summary>
+    /// Soft deletes a teacher and the associated user account.
+    /// </summary>
+    /// <param name="id">The id of the teacher to delete.</param>
+    /// <response code="204">If the teacher was deleted.</response>
+    /// <response code="401">If the request is not authenticated.</response>
+    /// <response code="403">If the user lacks permission to delete teachers.</response>
+    /// <response code="404">If the teacher does not exist.</response>
     [HttpDelete("{id:int}")]
     [Authorize(Policy = "DELETE_TEACHER")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

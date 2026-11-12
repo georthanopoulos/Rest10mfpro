@@ -20,4 +20,6 @@ public interface IUserService
 
     string CreateUserToken(User user);
 
+    Task ChangePasswordAsync(int userId, ChangePasswordDTO request);
+
 }

@@ -124,4 +124,72 @@ public class StudentService : IStudentService
         _logger.LogInformation("Retrieved {Count} students", dtoResult.Data.Count);
         return dtoResult;
     }
+
+    public async Task<StudentReadOnlyDTO> GetStudentByIdAsync(int id)
+    {
+        Student? student = await _unitOfWork.StudentRepository.GetAsync(id);
+
+        if (student == null)
+        {
+            throw new EntityNotFoundException("Student", $"Student with id={id} not found.");
+        }
+
+        _logger.LogInformation("Student with id={id} was successfully found", id);
+        return _mapper.Map<StudentReadOnlyDTO>(student); 
+
+    }
+
+    public async Task<StudentReadOnlyDTO> UpdateStudentAsync(int id, StudentUpdateDTO request)
+    {
+        Student? student = await _unitOfWork.StudentRepository.GetAsync(id);
+
+        if (student == null)
+        {
+            throw new EntityNotFoundException("Student", $"Student with id={id} not found.");
+        }
+
+        User? userWithEmail = await _unitOfWork.UserRepository.GetByEmailAsync(request.Email!);
+
+        if (userWithEmail != null && userWithEmail.Id != student.UserId)
+        {
+            throw new EntityAlreadyExistsException("User", "A user with this email already exists.");
+        }
+
+        student.User.Email = request.Email!;
+        student.User.Firstname = request.Firstname!;
+        student.User.Lastname = request.Lastname!;
+
+        student.Institution = request.Institution!;
+        student.Department = request.Department;
+
+        await _unitOfWork.SaveAsync();
+
+        _logger.LogInformation("Student with id={id} was successfully updated.", id);
+        return _mapper.Map<StudentReadOnlyDTO>(student);
+    }
+
+    public async Task DeleteStudentAsync(int id)
+    {
+        Student? student = await _unitOfWork.StudentRepository.GetAsync(id);
+
+        if ( student == null )
+        {
+            throw new EntityNotFoundException("Student", $"Student with id={id} not found");
+        }
+
+        var now = DateTime.UtcNow;
+
+        student.IsDeleted = true;
+        student.DeletedAt = now;
+
+        student.User.IsDeleted = true;
+        student.User.DeletedAt = now;
+
+        await _unitOfWork.SaveAsync();
+
+        _logger.LogInformation("The student with id={id} has been deleted successfully.", id);
+
+    }
+
+
 }

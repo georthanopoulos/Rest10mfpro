@@ -62,4 +62,11 @@ public class StudentRepository : BaseRepository<Student>, IStudentRepository
 
         return new PaginatedResult<User>(data, totalRecords, pageNumber, pageSize);
     }
+
+    public override async Task<Student?> GetAsync(int id)
+    {
+        return await _context.Students
+            .Include(s => s.User)
+            .FirstOrDefaultAsync(s => s.Id == id);
+    }
 }

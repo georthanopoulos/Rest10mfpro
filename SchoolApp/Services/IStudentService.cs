@@ -10,4 +10,10 @@ public interface IStudentService
 
     Task<PaginatedResult<StudentReadOnlyDTO>> GetPaginatedStudentsFilteredAsync(int pageNumber,
         int pageSize, StudentFiltersDTO filters);
+
+    Task<StudentReadOnlyDTO> GetStudentByIdAsync(int id);
+
+    Task<StudentReadOnlyDTO> UpdateStudentAsync(int id, StudentUpdateDTO request);
+
+    Task DeleteStudentAsync(int id);
 }

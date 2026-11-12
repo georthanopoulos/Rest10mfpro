@@ -112,6 +112,8 @@ namespace SchoolApp
                 options.AddPolicy("EDIT_TEACHER", p => p.RequireClaim("Capability", "EDIT_TEACHER"));
                 options.AddPolicy("DELETE_TEACHER", p => p.RequireClaim("Capability", "DELETE_TEACHER"));
                 options.AddPolicy("VIEW_STUDENTS", p => p.RequireClaim("Capability", "VIEW_STUDENTS"));
+                options.AddPolicy("EDIT_STUDENT", p => p.RequireClaim("Capability", "EDIT_STUDENT"));
+                options.AddPolicy("DELETE_STUDENT", p => p.RequireClaim("Capability", "DELETE_STUDENT"));
             });
 
             // END of Service registration area (above). Container configs. No object has beed created yet!!!!

@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using SchoolApp.Core;
 using SchoolApp.Core.Filters;
 using SchoolApp.DTO;
+using SchoolApp.Exceptions;
 using SchoolApp.Services;
+using System.Security.Claims;
 
 namespace SchoolApp.Controllers;
 
@@ -57,7 +59,7 @@ public class StudentsController : ControllerBase
     [ProducesResponseType(typeof(PaginatedResult<StudentReadOnlyDTO>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<PaginatedResult<StudentReadOnlyDTO>>> GetStudents (
+    public async Task<ActionResult<PaginatedResult<StudentReadOnlyDTO>>> GetStudents(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         [FromQuery] StudentFiltersDTO? filters = null)
@@ -68,4 +70,77 @@ public class StudentsController : ControllerBase
         return Ok(result);
 
     }
+
+    /// <summary>
+    /// Gets a student by id. A student can view only their own profile;
+    /// users with the VIEW_STUDENT capability can view any student.
+    /// </summary>
+    /// <param name="id">The id of the student.</param>
+    /// <returns>The student details.</returns>
+    /// <response code="200">Returns the student.</response>
+    /// <response code="401">If the request is not authenticated.</response>
+    /// <response code="403">If the user is not allowed to view this student.</response>
+    /// <response code="404">If the student does not exist.</response>
+    [HttpGet("{id:int}")]
+    [Authorize]
+    [ProducesResponseType(typeof(StudentReadOnlyDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<StudentReadOnlyDTO>> GetStudentById(int id)
+    {
+        var student = await _applicationService.StudentService.GetStudentByIdAsync(id);
+
+        int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out int currentUserId);
+
+        bool isOwnProfile = student.UserId == currentUserId; 
+
+        if (!(isOwnProfile || User.HasClaim("Capability", "VIEW_STUDENT")))
+        {
+            throw new EntityForbiddenException("Student", "You do not have permission to view this student.");
+        }
+
+        return Ok(student);
+    }
+
+    /// <summary>
+    /// Updates an existing student's details (email, firstname, lastname, institution, department).
+    /// </summary>
+    /// <param name="id">The id of the student to update.</param>
+    /// <param name="request">The new student details.</param>
+    /// <returns>The updated student.</returns>
+    /// <response code="200">Returns the updated student.</response>
+    /// <response code="400">If the request body is invalid.</response>
+    /// <response code="401">If the request is not authenticated.</response>
+    /// <response code="403">If the user lacks permission to edit students.</response>
+    /// <response code="404">If the student does not exist.</response>
+    /// <response code="409">If the email is already used by another user.</response>
+    [HttpPut("{id:int}")]
+    [Authorize(Policy = "EDIT_STUDENT")]
+    [ProducesResponseType(typeof(StudentReadOnlyDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<StudentReadOnlyDTO>> UpdateStudent(int id,
+        [FromBody] StudentUpdateDTO request)
+    {
+        var updated = await _applicationService.StudentService.UpdateStudentAsync(id, request);
+        return Ok(updated);
+    }
+
+    [HttpDelete("{id:int}")]
+    [Authorize(Policy = "DELETE_STUDENT")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> DeleteStudent(int id)
+    {
+        await _applicationService.StudentService.DeleteStudentAsync(id);
+
+        return NoContent();
+    }
+
 }

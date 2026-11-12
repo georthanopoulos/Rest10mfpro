@@ -173,4 +173,24 @@ public class UserService : IUserService
         // Serialize the token to a string
         return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
     }
+
+    public async Task ChangePasswordAsync(int userId, ChangePasswordDTO request)
+    {
+        User? user = await _unitOfWork.UserRepository.GetAsync(userId);
+
+        if (user == null || user.Status != AccountStatus.Active || user.Password == null)
+        {
+            throw new EntityNotAuthorizedException("User", "Bad Credentials");
+        }
+
+        if (user is null
+            || user.Status != AccountStatus.Active
+            || user.Password is null
+            || !_encryptionUtil.IsValidPassword(user.password, request))
+        {
+            throw new InvalidArgumentdException("CurrentPassword", "Current password is incorrect");
+        }
+
+
+    }
 }
