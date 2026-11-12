@@ -183,14 +183,21 @@ public class UserService : IUserService
             throw new EntityNotAuthorizedException("User", "Bad Credentials");
         }
 
-        if (user is null
-            || user.Status != AccountStatus.Active
-            || user.Password is null
-            || !_encryptionUtil.IsValidPassword(user.password, request))
+        if (!_encryptionUtil.IsValidPassword(request.CurrentPassword!, user.Password))
         {
-            throw new InvalidArgumentdException("CurrentPassword", "Current password is incorrect");
+            throw new InvalidArgumentException("CurrentPassword", "Current password is incorrect.");
         }
 
+        if (_encryptionUtil.IsValidPassword(request.NewPassword!, user.Password))
+        {
+            throw new InvalidArgumentException("NewPassword", "New password must differ from the current one.");
+        }
 
+        user.Password = _encryptionUtil.Encrypt(request.NewPassword!);
+        user.MustChangePassword = false;
+
+        await _unitOfWork.SaveAsync();
+
+        _logger.LogInformation("Password has changed for user with id={id}.", userId);
     }
 }

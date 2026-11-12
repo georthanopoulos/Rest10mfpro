@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SchoolApp.DTO;
 using SchoolApp.Exceptions;
 using SchoolApp.Services;
+using System.Security.Claims;
 
 namespace SchoolApp.Controllers;
 
@@ -45,6 +46,24 @@ public class AuthController : ControllerBase
         [FromBody] ActivateAccountDTO activateAccountDTO) 
     {
         await _applicationService.UserService.ActivateAccountAsync(activateAccountDTO);
+
+        return NoContent();
+    }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult> ChangePassword(
+        [FromBody] ChangePasswordDTO request)
+    {
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
+        {
+            throw new EntityNotAuthorizedException("User", "Bad credentials");
+        }
+
+        await _applicationService.UserService.ChangePasswordAsync(userId, request);
 
         return NoContent();
     }
