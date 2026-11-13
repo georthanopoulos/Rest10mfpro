@@ -6,6 +6,7 @@ using Microsoft.OpenApi;
 using SchoolApp.Configuration;
 using SchoolApp.Data;
 using SchoolApp.Helpers;
+using SchoolApp.Middleware;
 using SchoolApp.Repositories;
 using SchoolApp.Security;
 using SchoolApp.Services;
@@ -145,7 +146,8 @@ namespace SchoolApp
             app.UseHttpsRedirection();
 
             app.UseCors("AllowCFClient");
-            app.UseAuthentication();                        // Enables the authentication middleware in the pipeline. The incoming requests will be checked for JWT token and the HttpContext.User will becoming populate. The HttpContext.User is the principal.
+            app.UseAuthentication();                            // Enables the authentication middleware in the pipeline. The incoming requests will be checked for JWT token and the HttpContext.User will becoming populate. The HttpContext.User is the principal.
+            app.UseMiddleware<MustChangePasswordMiddleware>();
             app.UseAuthorization();
 
 
