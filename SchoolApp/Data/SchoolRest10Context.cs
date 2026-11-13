@@ -80,6 +80,8 @@ public class SchoolRest10Context : DbContext
 
             entity.HasIndex(e => e.Description, "IX_Courses_Description");
             entity.HasIndex(e => e.TeacherId, "IX_Courses_TeacherId");
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
         });
 
         modelBuilder.Entity<Role>(entity =>
