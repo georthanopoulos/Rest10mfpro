@@ -9,12 +9,16 @@ public class ApplicationService : IApplicationService
 
     public IStudentService StudentService { get; }
 
+    public ICourseService CourseService { get; }
+
     // Other services can be added
 
-    public ApplicationService(IUserService userService, ITeacherService teacherService, IStudentService studentService)
+    public ApplicationService(IUserService userService, ITeacherService teacherService,
+        IStudentService studentService, ICourseService courseService)
     {
         UserService = userService;
         TeacherService = teacherService;
         StudentService = studentService;
+        CourseService = courseService;
     }
 }

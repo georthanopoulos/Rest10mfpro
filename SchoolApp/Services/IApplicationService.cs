@@ -8,5 +8,7 @@ public interface IApplicationService
 
     IStudentService StudentService { get; }
 
+    ICourseService CourseService { get; }
+
     // OtherService can be added { get; }
 }

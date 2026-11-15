@@ -46,5 +46,11 @@ public class MapperConfig : Profile
             .ForMember(dest => dest.Firstname, opt => opt.MapFrom(src => src.User.Firstname))
             .ForMember(dest => dest.Lastname, opt => opt.MapFrom(src => src.User.Lastname));
 
+        CreateMap<Course, CourseReadOnlyDTO>()
+             .ForMember(dest => dest.TeacherLastname,
+                opt => opt.MapFrom(src => src.Teacher != null ? src.Teacher.User.Lastname : null));
+
+        CreateMap<CourseInsertDTO, Course>();
+
     }
 }

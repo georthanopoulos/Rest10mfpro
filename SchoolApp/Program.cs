@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -35,6 +34,7 @@ namespace SchoolApp
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITeacherService, TeacherService>();
             builder.Services.AddScoped<IStudentService, StudentService>();
+            builder.Services.AddScoped<ICourseService, CourseService>();
             builder.Services.AddScoped<IApplicationService, ApplicationService>();
             builder.Services.AddSingleton<IEncryptionUtil,  EncryptionUtil>();
             builder.Services.AddSingleton<IActivationTokenUtil, ActivationTokenUtil>();
@@ -115,6 +115,11 @@ namespace SchoolApp
                 options.AddPolicy("VIEW_STUDENTS", p => p.RequireClaim("Capability", "VIEW_STUDENTS"));
                 options.AddPolicy("EDIT_STUDENT", p => p.RequireClaim("Capability", "EDIT_STUDENT"));
                 options.AddPolicy("DELETE_STUDENT", p => p.RequireClaim("Capability", "DELETE_STUDENT"));
+                options.AddPolicy("INSERT_COURSE", p => p.RequireClaim("Capability", "INSERT_COURSE"));
+                options.AddPolicy("VIEW_COURSES", p => p.RequireClaim("Capability", "VIEW_COURSES"));
+                options.AddPolicy("VIEW_COURSE", p => p.RequireClaim("Capability", "VIEW_COURSE"));
+                options.AddPolicy("EDIT_COURSE", p => p.RequireClaim("Capability", "EDIT_COURSE"));
+                options.AddPolicy("DELETE_COURSE", p => p.RequireClaim("Capability", "DELETE_COURSE"));
             });
 
             // END of Service registration area (above). Container configs. No object has beed created yet!!!!
