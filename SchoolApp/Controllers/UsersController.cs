@@ -107,7 +107,7 @@ public class UsersController : ControllerBase
     private void EnsureCanViewUserCore(bool isOwnProfile)
     {
 
-        // Allowed: own profile OR VIEW_USERS capability
+                                                                       // Allowed: own profile OR VIEW_USERS capability
         if (isOwnProfile || User.HasClaim("Capability", "VIEW_USERS"))
         {
             return;
