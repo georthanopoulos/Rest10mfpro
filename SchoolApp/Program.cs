@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -121,6 +122,8 @@ namespace SchoolApp
                 options.AddPolicy("EDIT_COURSE", p => p.RequireClaim("Capability", "EDIT_COURSE"));
                 options.AddPolicy("DELETE_COURSE", p => p.RequireClaim("Capability", "DELETE_COURSE"));
             });
+
+            builder.Services.AddSingleton<IAuthorizationHandler, OwnerOrCapabilityHandler>();
 
             // END of Service registration area (above). Container configs. No object has beed created yet!!!!
 
