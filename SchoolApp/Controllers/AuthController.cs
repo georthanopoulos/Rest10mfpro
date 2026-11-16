@@ -23,33 +23,52 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <param name="userLoginDTO">The user login credentials.</param>
     /// <returns>A JWT token for the authenticated user.</returns>
-    /// <exception cref="EntityNotAuthorizedException">Thrown when the user credentials are invalid.</exception>
+    /// <response code="200">Returns the JWT token.</response>
+    /// <response code="400">If the request body is invalid.</response>
+    /// <response code="401">If the credentials are invalid or the account is not active.</response>
     [HttpPost("login")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(JwtTokenDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<JwtTokenDTO>> Login(
         [FromBody] UserLoginDTO userLoginDTO)
     {
-        var user = await _applicationService.UserService.VerifyAndGetUserAsync(userLoginDTO)
-            ?? throw new EntityNotAuthorizedException("User", "Bad Credentials");
+        var user = await _applicationService.UserService.VerifyAndGetUserAsync(userLoginDTO);
 
         var token = _applicationService.UserService.CreateUserToken(user);
 
         return Ok(new JwtTokenDTO(token));
     }
 
+    /// <summary>
+    /// Activates a pre-registered account: the user chooses a password
+    /// using the one-time activation token received from the registrar.
+    /// </summary>
+    /// <param name="activateAccountDTO">The activation token and the new password.</param>
+    /// <response code="204">If the account was activated.</response>
+    /// <response code="400">If the request body is invalid or the token is invalid, used or expired.</response>
     [HttpPost("activate")]
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> Activate(
-        [FromBody] ActivateAccountDTO activateAccountDTO) 
+        [FromBody] ActivateAccountDTO activateAccountDTO)
     {
         await _applicationService.UserService.ActivateAccountAsync(activateAccountDTO);
 
         return NoContent();
     }
 
+    /// <summary>
+    /// Changes the password of the authenticated user.
+    /// Also the only endpoint allowed while a password change is required.
+    /// </summary>
+    /// <param name="request">The current and the new password.</param>
+    /// <response code="204">If the password was changed.</response>
+    /// <response code="400">If the request body is invalid, the current password is wrong
+    /// or the new password equals the current one.</response>
+    /// <response code="401">If the request is not authenticated.</response>
     [HttpPost("change-password")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -60,12 +79,11 @@ public class AuthController : ControllerBase
     {
         if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
         {
-            throw new EntityNotAuthorizedException("User", "Bad credentials");
+            throw new EntityNotAuthorizedException("User", "Bad Credentials");
         }
 
         await _applicationService.UserService.ChangePasswordAsync(userId, request);
 
         return NoContent();
     }
-
 }

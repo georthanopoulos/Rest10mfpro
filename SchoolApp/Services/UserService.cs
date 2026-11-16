@@ -9,7 +9,6 @@ using SchoolApp.Repositories;
 using SchoolApp.Security;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
-using System.Net;
 using System.Security.Claims;
 using System.Text;
 
@@ -19,7 +18,7 @@ public class UserService : IUserService
 {
     private readonly IEncryptionUtil _encryptionUtil;
     private readonly IUnitOfWork _unitOfWork;
-    private IMapper _mapper;
+    private readonly IMapper _mapper;
     private readonly ILogger<UserService> _logger;
     private readonly IConfiguration _configuration;
     private readonly IActivationTokenUtil _activationTokenUtil;
@@ -78,9 +77,8 @@ public class UserService : IUserService
         return dtoResult;
     }
 
-    public async Task<UserReadOnlyDTO?> GetUserByUsernameAsync(string username)
+    public async Task<UserReadOnlyDTO> GetUserByUsernameAsync(string username)
     {
-        
         User? user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
 
         if (user is null)
@@ -90,7 +88,6 @@ public class UserService : IUserService
 
         _logger.LogInformation("User found with username={Username}", username);
         return _mapper.Map<UserReadOnlyDTO>(user);
-     
     }
 
     public async Task<UserReadOnlyDTO> GetUserByIdAsync(int id)
@@ -106,17 +103,26 @@ public class UserService : IUserService
         return _mapper.Map<UserReadOnlyDTO>(user);
     }
 
-    public async Task<User?> VerifyAndGetUserAsync(UserLoginDTO credentials)
+    // Used only to burn the same CPU time when the user does not exist
+    private static readonly string DummyPasswordHash = BCrypt.Net.BCrypt.HashPassword("dummy-password");
+
+    public async Task<User> VerifyAndGetUserAsync(UserLoginDTO credentials)
     {
         User? user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(credentials.Username!);
+
+        // Always run one password check, so the response time does not reveal
+        // whether the username exists
+        string hashToCheck = user?.Password ?? DummyPasswordHash;
+        bool isPasswordValid = _encryptionUtil.IsValidPassword(credentials.Password!, hashToCheck);
 
         if (user is null
             || user.Status != AccountStatus.Active
             || user.Password is null
-            || !_encryptionUtil.IsValidPassword(credentials.Password!, user.Password))
+            || !isPasswordValid)
         {
             throw new EntityNotAuthorizedException("Auth", "Bad Credentials");
         }
+
         _logger.LogInformation("User with username={Username} verified for login.", credentials.Username);
         return user;
     }

@@ -7,9 +7,9 @@ namespace SchoolApp.Services;
 
 public interface IUserService
 {
-    Task<User?> VerifyAndGetUserAsync(UserLoginDTO credentials);
+    Task<User> VerifyAndGetUserAsync(UserLoginDTO credentials);
 
-    Task<UserReadOnlyDTO?> GetUserByUsernameAsync(string username);
+    Task<UserReadOnlyDTO> GetUserByUsernameAsync(string username);
 
     Task<UserReadOnlyDTO> GetUserByIdAsync (int id);
 

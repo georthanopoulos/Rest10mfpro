@@ -4,8 +4,8 @@ using SchoolApp.Core;
 using SchoolApp.Core.Filters;
 using SchoolApp.DTO;
 using SchoolApp.Exceptions;
+using SchoolApp.Security.ResourceAuthorization;
 using SchoolApp.Services;
-using System.Security.Claims;
 
 namespace SchoolApp.Controllers;
 
@@ -14,17 +14,25 @@ namespace SchoolApp.Controllers;
 public class StudentsController : ControllerBase
 {
     private readonly IApplicationService _applicationService;
+    private readonly IAuthorizationService _authorizationService;
 
-    public StudentsController(IApplicationService applicationService)
+    public StudentsController(IApplicationService applicationService, IAuthorizationService authorizationService)
     {
         _applicationService = applicationService;
+        _authorizationService = authorizationService;
     }
 
     /// <summary>
-    /// Pre-registers a new Student and User account
+    /// Pre-registers a new Student and User account. The returned activation token
+    /// is used by the student at /auth/activate to choose a password.
     /// </summary>
-    /// <param name="studentPreRegisterDTO"></param>
-    /// <returns>Activation Token</returns>
+    /// <param name="studentPreRegisterDTO">The student's registration details.</param>
+    /// <returns>The created user and the one-time activation token.</returns>
+    /// <response code="201">If the student was pre-registered.</response>
+    /// <response code="400">If the request body is invalid.</response>
+    /// <response code="401">If the request is not authenticated.</response>
+    /// <response code="403">If the user lacks permission to register students.</response>
+    /// <response code="409">If the username, email or AM already exists.</response>
     [HttpPost]
     [Authorize(Policy = "INSERT_STUDENT")]
     [ProducesResponseType(typeof(PreRegistrationResultDTO), StatusCodes.Status201Created)]
@@ -91,11 +99,10 @@ public class StudentsController : ControllerBase
     {
         var student = await _applicationService.StudentService.GetStudentByIdAsync(id);
 
-        int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out int currentUserId);
+        var authResult = await _authorizationService.AuthorizeAsync(
+            User, student.UserId, new OwnerOrCapabilityRequirement("VIEW_STUDENT"));
 
-        bool isOwnProfile = student.UserId == currentUserId; 
-
-        if (!(isOwnProfile || User.HasClaim("Capability", "VIEW_STUDENT")))
+        if (!authResult.Succeeded)
         {
             throw new EntityForbiddenException("Student", "You do not have permission to view this student.");
         }
@@ -130,6 +137,14 @@ public class StudentsController : ControllerBase
         return Ok(updated);
     }
 
+    /// <summary>
+    /// Soft deletes a student and the associated user account.
+    /// </summary>
+    /// <param name="id">The id of the student to delete.</param>
+    /// <response code="204">If the student was deleted.</response>
+    /// <response code="401">If the request is not authenticated.</response>
+    /// <response code="403">If the user lacks permission to delete students.</response>
+    /// <response code="404">If the student does not exist.</response>
     [HttpDelete("{id:int}")]
     [Authorize(Policy = "DELETE_STUDENT")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

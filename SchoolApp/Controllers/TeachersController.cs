@@ -4,8 +4,8 @@ using SchoolApp.Core;
 using SchoolApp.Core.Filters;
 using SchoolApp.DTO;
 using SchoolApp.Exceptions;
+using SchoolApp.Security.ResourceAuthorization;
 using SchoolApp.Services;
-using System.Security.Claims;
 
 namespace SchoolApp.Controllers;
 
@@ -14,17 +14,25 @@ namespace SchoolApp.Controllers;
 public class TeachersController : ControllerBase
 {
     private readonly IApplicationService _applicationService;
+    private readonly IAuthorizationService _authorizationService;
 
-    public TeachersController(IApplicationService applicationService)
+    public TeachersController(IApplicationService applicationService, IAuthorizationService authorizationService)
     {
         _applicationService = applicationService;
+        _authorizationService = authorizationService;
     }
 
     /// <summary>
-    /// Pre-registers a new Teacher and User account
+    /// Pre-registers a new Teacher and User account. The returned activation token
+    /// is used by the teacher at /auth/activate to choose a password.
     /// </summary>
-    /// <param name="teacherPreRegisterDTO"></param>
-    /// <returns>Activation Token</returns>
+    /// <param name="teacherPreRegisterDTO">The teacher's registration details.</param>
+    /// <returns>The created user and the one-time activation token.</returns>
+    /// <response code="201">If the teacher was pre-registered.</response>
+    /// <response code="400">If the request body is invalid.</response>
+    /// <response code="401">If the request is not authenticated.</response>
+    /// <response code="403">If the user lacks permission to register teachers.</response>
+    /// <response code="409">If the username, email or phone number already exists.</response>
     [HttpPost]
     [Authorize(Policy = "INSERT_TEACHER")]
     [ProducesResponseType(typeof(PreRegistrationResultDTO), StatusCodes.Status201Created)]
@@ -50,7 +58,7 @@ public class TeachersController : ControllerBase
     /// <param name="pageNumber">The page number (1-based). Default is 1.</param>
     /// <param name="pageSize">The number of items per page. Default is 10.</param>
     /// <param name="filters">Optional filters for username, email, lastname and institution.</param>
-    /// <returns>A paginated list of teaches matching the filters.</returns>
+    /// <returns>A paginated list of teachers matching the filters.</returns>
     /// <response code="200">Returns the paginated teacher list.</response>
     /// <response code="401">If the request is not authenticated.</response>
     /// <response code="403">If the user lacks permission to list teachers.</response>
@@ -90,11 +98,10 @@ public class TeachersController : ControllerBase
     {
         var teacher = await _applicationService.TeacherService.GetTeacherByIdAsync(id);
 
-        int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out int currentUserId);
+        var authResult = await _authorizationService.AuthorizeAsync(
+            User, teacher.UserId, new OwnerOrCapabilityRequirement("VIEW_TEACHER"));
 
-        bool isOwnProfile = teacher.UserId == currentUserId;
-
-        if (!(isOwnProfile || User.HasClaim("Capability", "VIEW_TEACHER")))
+        if (!authResult.Succeeded)
         {
             throw new EntityForbiddenException("Teacher", "You do not have permission to view this teacher.");
         }
