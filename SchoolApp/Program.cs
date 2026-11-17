@@ -121,6 +121,8 @@ namespace SchoolApp
                 options.AddPolicy("VIEW_COURSE", p => p.RequireClaim("Capability", "VIEW_COURSE"));
                 options.AddPolicy("EDIT_COURSE", p => p.RequireClaim("Capability", "EDIT_COURSE"));
                 options.AddPolicy("DELETE_COURSE", p => p.RequireClaim("Capability", "DELETE_COURSE"));
+                options.AddPolicy("ENROLL_STUDENT", p => p.RequireClaim("Capability", "ENROLL_STUDENT"));
+                options.AddPolicy("UNENROLL_STUDENT", p => p.RequireClaim("Capability", "UNENROLL_STUDENT"));
             });
 
             builder.Services.AddSingleton<IAuthorizationHandler, OwnerOrCapabilityHandler>();

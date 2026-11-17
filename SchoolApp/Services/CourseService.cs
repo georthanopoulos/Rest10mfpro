@@ -101,8 +101,60 @@ public class CourseService : ICourseService
         _logger.LogInformation("Course with id={id} has been deleted successfully.", id);
     }
 
-                                                // Returns the teacher with the given id, or null when no teacher is given.
-                                                // Throws 400 when a teacher id is given but no such (non-deleted) teacher exists.
+    public async Task EnrollStudentAsync(int courseId, int studentId)
+    {
+        Course? course = await _unitOfWork.CourseRepository.GetCourseWithStudentsAsync(courseId);
+
+        if (course == null)
+        {
+            throw new EntityNotFoundException("Course", $"Course with id={courseId} not found.");
+        }
+
+        Student? student = await _unitOfWork.StudentRepository.GetAsync(studentId);
+
+        if (student == null)
+        {
+            throw new EntityNotFoundException("Student", $"Student with id={studentId} not found.");
+        }
+
+        if (course.Students.Any(s => s.Id == studentId))
+        {
+            throw new EntityAlreadyExistsException("Enrollment",
+                $"Student with id={studentId} is already enrolled in course with id={courseId}.");
+        }
+
+        course.Students.Add(student);
+        await _unitOfWork.SaveAsync();
+
+        _logger.LogInformation("Student with id={studentId} was enrolled in course with id={courseId}.", studentId, courseId);
+    }
+
+    public async Task UnenrollStudentAsync(int courseId, int studentId)
+    {
+        Course? course = await _unitOfWork.CourseRepository.GetCourseWithStudentsAsync(courseId);
+
+        if (course == null)
+        {
+            throw new EntityNotFoundException("Course", $"Course with id={courseId} not found.");
+        }
+
+        Student? student = course.Students.SingleOrDefault(s => s.Id == studentId);
+
+        if (student == null)
+        {
+            throw new EntityNotFoundException("Enrollment",
+                $"Student with id={studentId} is not enrolled in course with id={courseId}.");
+        }
+
+        course.Students.Remove(student);
+        await _unitOfWork.SaveAsync();
+
+        _logger.LogInformation("Student with id={studentId} was removed from course with id={courseId}.", studentId, courseId);
+    }
+
+
+                                                            // Returns the teacher with the given id, or null when no teacher is given.
+                                                            // Throws 400 when a teacher id is given but no such (non-deleted) teacher exists.
     private async Task<Teacher?> GetTeacherOrThrowAsync(int? teacherId)
     {
         if (teacherId == null)

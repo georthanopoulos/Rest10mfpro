@@ -10,4 +10,6 @@ public interface ICourseRepository : IBaseRepository<Course>
     Task<Teacher?> GetCourseTeacherAsync(int courseId);
 
     Task<PaginatedResult<Course>> GetPaginatedCoursesWithTeacherAsync(int pageNumber, int pageSize);
+
+    Task<Course?> GetCourseWithStudentsAsync(int courseId);
 }

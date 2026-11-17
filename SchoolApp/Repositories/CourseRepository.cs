@@ -28,6 +28,13 @@ public class CourseRepository : BaseRepository<Course>, ICourseRepository
         return course?.Teacher;
     }
 
+    public async Task<Course?> GetCourseWithStudentsAsync(int courseId)
+    {
+        return await _context.Courses
+            .Include(c => c.Students)
+            .SingleOrDefaultAsync(c => c.Id == courseId);
+    }
+
     public override async Task<Course?> GetAsync(int id)
     {
         return await _context.Courses
@@ -57,4 +64,5 @@ public class CourseRepository : BaseRepository<Course>, ICourseRepository
 
         return new PaginatedResult<Course>(data, totalRecords, pageNumber, pageSize);
     }
+
 }

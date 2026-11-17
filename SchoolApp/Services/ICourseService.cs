@@ -14,4 +14,8 @@ public interface ICourseService
     Task<CourseReadOnlyDTO> UpdateCourseAsync(int id, CourseUpdateDTO request);
 
     Task DeleteCourseAsync(int id);
+
+    Task EnrollStudentAsync(int courseId, int studentId);
+
+    Task UnenrollStudentAsync(int courseId, int studentId);
 }
