@@ -38,17 +38,23 @@ public class CourseService : ICourseService
     {
         var paginatedResult = await _unitOfWork.CourseRepository.GetPaginatedCoursesWithTeacherAsync(pageNumber, pageSize);
 
-        var dtoResult = new PaginatedResult<CourseReadOnlyDTO>()
-        {
-            Data = _mapper.Map<List<CourseReadOnlyDTO>>(paginatedResult.Data),
-            TotalRecords = paginatedResult.TotalRecords,
-            PageNumber = paginatedResult.PageNumber,
-            PageSize = paginatedResult.PageSize
-        };
-
-        _logger.LogInformation("Retrieved {Count} courses", dtoResult.Data.Count);
-        return dtoResult;
+        return MapToDtoResult(paginatedResult);
     }
+
+    public async Task<PaginatedResult<CourseReadOnlyDTO>> GetPaginatedCoursesByTeacherAsync(int teacherId, int pageNumber, int pageSize)
+    {
+        var paginatedResult = await _unitOfWork.CourseRepository.GetPaginatedCoursesByTeacherAsync(teacherId, pageNumber, pageSize);
+
+        return MapToDtoResult(paginatedResult);
+    }
+
+    public async Task<PaginatedResult<CourseReadOnlyDTO>> GetPaginatedCoursesByStudentAsync(int studentId, int pageNumber, int pageSize)
+    {
+        var paginatedResult = await _unitOfWork.CourseRepository.GetPaginatedCoursesByStudentAsync(studentId, pageNumber, pageSize);
+
+        return MapToDtoResult(paginatedResult);
+    }
+
 
     public async Task<CourseReadOnlyDTO> GetCourseByIdAsync(int id)
     {
@@ -170,5 +176,19 @@ public class CourseService : ICourseService
         }
 
         return teacher;
+    }
+
+    private PaginatedResult<CourseReadOnlyDTO> MapToDtoResult(PaginatedResult<Course> paginatedResult)
+    {
+        var dtoResult = new PaginatedResult<CourseReadOnlyDTO>()
+        {
+            Data = _mapper.Map<List<CourseReadOnlyDTO>>(paginatedResult.Data),
+            TotalRecords = paginatedResult.TotalRecords,
+            PageNumber = paginatedResult.PageNumber,
+            PageSize = paginatedResult.PageSize
+        };
+
+        _logger.LogInformation("Retrieved {Count} courses", dtoResult.Data.Count);
+        return dtoResult;
     }
 }

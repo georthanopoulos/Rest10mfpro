@@ -136,7 +136,6 @@ public class StudentService : IStudentService
 
         _logger.LogInformation("Student with id={id} was successfully found", id);
         return _mapper.Map<StudentReadOnlyDTO>(student); 
-
     }
 
     public async Task<StudentReadOnlyDTO> UpdateStudentAsync(int id, StudentUpdateDTO request)
@@ -172,7 +171,7 @@ public class StudentService : IStudentService
     {
         Student? student = await _unitOfWork.StudentRepository.GetAsync(id);
 
-        if ( student == null )
+        if (student == null)
         {
             throw new EntityNotFoundException("Student", $"Student with id={id} not found");
         }
@@ -190,6 +189,5 @@ public class StudentService : IStudentService
         _logger.LogInformation("The student with id={id} has been deleted successfully.", id);
 
     }
-
 
 }

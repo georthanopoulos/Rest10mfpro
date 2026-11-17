@@ -130,4 +130,48 @@ public class CoursesController : ControllerBase
         await _applicationService.CourseService.DeleteCourseAsync(id);
         return NoContent();
     }
+
+    /// <summary>
+    /// Enrolls a student in a course.
+    /// </summary>
+    /// <param name="courseId">The id of the course.</param>
+    /// <param name="studentId">The id of the student to enroll.</param>
+    /// <response code="204">If the student was enrolled.</response>
+    /// <response code="401">If the request is not authenticated.</response>
+    /// <response code="403">If the user lacks permission to enroll students.</response>
+    /// <response code="404">If the course or the student does not exist.</response>
+    /// <response code="409">If the student is already enrolled in the course.</response>
+    [HttpPost("{courseId:int}/students/{studentId:int}")]
+    [Authorize(Policy = "ENROLL_STUDENT")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult> EnrollStudent(int courseId, int studentId)
+    {
+        await _applicationService.CourseService.EnrollStudentAsync(courseId, studentId);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Removes a student from a course.
+    /// </summary>
+    /// <param name="courseId">The id of the course.</param>
+    /// <param name="studentId">The id of the student to remove.</param>
+    /// <response code="204">If the student was removed from the course.</response>
+    /// <response code="401">If the request is not authenticated.</response>
+    /// <response code="403">If the user lacks permission to remove students from courses.</response>
+    /// <response code="404">If the course does not exist or the student is not enrolled in it.</response>
+    [HttpDelete("{courseId:int}/students/{studentId:int}")]
+    [Authorize(Policy = "UNENROLL_STUDENT")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> UnenrollStudent(int courseId, int studentId)
+    {
+        await _applicationService.CourseService.UnenrollStudentAsync(courseId, studentId);
+        return NoContent();
+    }
 }

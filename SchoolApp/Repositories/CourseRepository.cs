@@ -49,6 +49,32 @@ public class CourseRepository : BaseRepository<Course>, ICourseRepository
             .Include(c => c.Teacher)
                 .ThenInclude(t => t.User);
 
+        return await ToPaginatedResultAsync(query, pageNumber, pageSize);
+    }
+
+    public async Task<PaginatedResult<Course>> GetPaginatedCoursesByTeacherAsync(int teacherId, int pageNumber, int pageSize)
+    {
+        IQueryable<Course> query = _context.Courses
+            .Where(c => c.TeacherId == teacherId)
+            .Include(c => c.Teacher)
+                .ThenInclude(t => t.User);
+
+        return await ToPaginatedResultAsync(query, pageNumber, pageSize);
+    }
+
+    public async Task<PaginatedResult<Course>> GetPaginatedCoursesByStudentAsync(int studentId, int pageNumber, int pageSize)
+    {
+        IQueryable<Course> query = _context.Courses
+            .Where(c => c.Students.Any(s => s.Id == studentId))
+            .Include(c => c.Teacher)
+                .ThenInclude(t => t.User);
+
+        return await ToPaginatedResultAsync(query, pageNumber, pageSize);
+    }
+
+    private static async Task<PaginatedResult<Course>> ToPaginatedResultAsync(
+        IQueryable<Course> query, int pageNumber, int pageSize)
+    {
         int totalRecords = await query.CountAsync();
 
         if (pageNumber < 1) pageNumber = 1;

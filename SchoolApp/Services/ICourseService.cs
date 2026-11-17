@@ -18,4 +18,8 @@ public interface ICourseService
     Task EnrollStudentAsync(int courseId, int studentId);
 
     Task UnenrollStudentAsync(int courseId, int studentId);
+
+    Task<PaginatedResult<CourseReadOnlyDTO>> GetPaginatedCoursesByTeacherAsync(int teacherId, int pageNumber, int pageSize);
+
+    Task<PaginatedResult<CourseReadOnlyDTO>> GetPaginatedCoursesByStudentAsync(int studentId, int pageNumber, int pageSize);
 }
