@@ -97,6 +97,16 @@ namespace SchoolApp.Migrations
                         },
                         new
                         {
+                            CapabilitiesId = 20,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 21,
+                            RolesId = 2
+                        },
+                        new
+                        {
                             CapabilitiesId = 1,
                             RolesId = 1
                         },
@@ -188,6 +198,16 @@ namespace SchoolApp.Migrations
                         new
                         {
                             CapabilitiesId = 19,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 20,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 21,
                             RolesId = 1
                         });
                 });
@@ -365,6 +385,18 @@ namespace SchoolApp.Migrations
                             Id = 19,
                             Description = "Create another admin user",
                             Name = "INSERT_ADMIN"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Description = "Enroll a student in a course",
+                            Name = "ENROLL_STUDENT"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Description = "Remove a student from a course",
+                            Name = "UNENROLL_STUDENT"
                         });
                 });
 

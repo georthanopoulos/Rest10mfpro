@@ -94,7 +94,7 @@ public class SchoolRest10Context : DbContext
                 j.HasIndex("CapabilitiesId").HasDatabaseName("IX_RolesCapabilities_CapabilityId");
                 j.HasData(new { RolesId = 3, CapabilitiesId = 6 });        // TEACHER (3): view only teacher
                 j.HasData(new { RolesId = 4, CapabilitiesId = 12 });       // STUDENT (4): view only student
-                j.HasData(                                                 // EMPLOYEE (2): insert teacher/student, view teachers/students/courses, view users
+                j.HasData(                                                 // EMPLOYEE (2): insert teacher/student, view teachers/students/courses, view users, to enroll/unenroll students
                 new { RolesId = 2, CapabilitiesId = 1 },
                 new { RolesId = 2, CapabilitiesId = 2 },
                 new { RolesId = 2, CapabilitiesId = 3 },
@@ -103,8 +103,10 @@ public class SchoolRest10Context : DbContext
                 new { RolesId = 2, CapabilitiesId = 9 },
                 new { RolesId = 2, CapabilitiesId = 14 },
                 new { RolesId = 2, CapabilitiesId = 15 },
-                new { RolesId = 2, CapabilitiesId = 18 });
-                j.HasData(Enumerable.Range(1, 19)                           // ADMIN (1): ALL 19 rights reserved. The command produces all numbers from 1 up to 19 and with Select a line for each one is created, instead of writing 19 lines of code.
+                new { RolesId = 2, CapabilitiesId = 18 },
+                new { RolesId = 2, CapabilitiesId = 20 },
+                new { RolesId = 2, CapabilitiesId = 21 });
+                j.HasData(Enumerable.Range(1, 21)                           // ADMIN (1): ALL 21 rights reserved. The command produces all numbers from 1 up to 21 and with Select a line for each one is created, instead of writing 21 lines of code.
                        .Select(id => new { RolesId = 1, CapabilitiesId = id }));
 
             });
@@ -142,7 +144,9 @@ public class SchoolRest10Context : DbContext
             new Capability { Id = 16, Name = "EDIT_COURSE", Description = "Modify existing course" },
             new Capability { Id = 17, Name = "DELETE_COURSE", Description = "Remove a course" },
             new Capability { Id = 18, Name = "VIEW_USERS", Description = "View the list of all users (registry)" },
-            new Capability { Id = 19, Name = "INSERT_ADMIN", Description = "Create another admin user" });
+            new Capability { Id = 19, Name = "INSERT_ADMIN", Description = "Create another admin user" },
+            new Capability { Id = 20, Name = "ENROLL_STUDENT", Description = "Enroll a student in a course" },
+            new Capability { Id = 21, Name = "UNENROLL_STUDENT", Description = "Remove a student from a course" });
         });
 
         modelBuilder.Entity<User>(entity =>

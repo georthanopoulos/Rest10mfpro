@@ -1,0 +1,1 @@
+﻿Old scripts from before Code First (EF migrations). Kept for history only. Do not run.
