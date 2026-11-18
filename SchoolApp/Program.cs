@@ -5,7 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using SchoolApp.Configuration;
 using SchoolApp.Data;
-using SchoolApp.Helpers;
 using SchoolApp.Middleware;
 using SchoolApp.Repositories;
 using SchoolApp.Security;
@@ -107,22 +106,22 @@ namespace SchoolApp
 
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("VIEW_USERS", p => p.RequireClaim("Capability", "VIEW_USERS"));
-                options.AddPolicy("INSERT_TEACHER", p => p.RequireClaim("Capability", "INSERT_TEACHER"));
-                options.AddPolicy("INSERT_STUDENT", p => p.RequireClaim("Capability", "INSERT_STUDENT"));
-                options.AddPolicy("VIEW_TEACHERS", p => p.RequireClaim("Capability", "VIEW_TEACHERS"));
-                options.AddPolicy("EDIT_TEACHER", p => p.RequireClaim("Capability", "EDIT_TEACHER"));
-                options.AddPolicy("DELETE_TEACHER", p => p.RequireClaim("Capability", "DELETE_TEACHER"));
-                options.AddPolicy("VIEW_STUDENTS", p => p.RequireClaim("Capability", "VIEW_STUDENTS"));
-                options.AddPolicy("EDIT_STUDENT", p => p.RequireClaim("Capability", "EDIT_STUDENT"));
-                options.AddPolicy("DELETE_STUDENT", p => p.RequireClaim("Capability", "DELETE_STUDENT"));
-                options.AddPolicy("INSERT_COURSE", p => p.RequireClaim("Capability", "INSERT_COURSE"));
-                options.AddPolicy("VIEW_COURSES", p => p.RequireClaim("Capability", "VIEW_COURSES"));
-                options.AddPolicy("VIEW_COURSE", p => p.RequireClaim("Capability", "VIEW_COURSE"));
-                options.AddPolicy("EDIT_COURSE", p => p.RequireClaim("Capability", "EDIT_COURSE"));
-                options.AddPolicy("DELETE_COURSE", p => p.RequireClaim("Capability", "DELETE_COURSE"));
-                options.AddPolicy("ENROLL_STUDENT", p => p.RequireClaim("Capability", "ENROLL_STUDENT"));
-                options.AddPolicy("UNENROLL_STUDENT", p => p.RequireClaim("Capability", "UNENROLL_STUDENT"));
+                options.AddPolicy(Capabilities.ViewUsers, p => p.RequireClaim("Capability", Capabilities.ViewUsers));
+                options.AddPolicy(Capabilities.InsertTeacher, p => p.RequireClaim("Capability", Capabilities.InsertTeacher));
+                options.AddPolicy(Capabilities.InsertStudent, p => p.RequireClaim("Capability", Capabilities.InsertStudent));
+                options.AddPolicy(Capabilities.ViewTeachers, p => p.RequireClaim("Capability", Capabilities.ViewTeachers));
+                options.AddPolicy(Capabilities.EditTeacher, p => p.RequireClaim("Capability", Capabilities.EditTeacher));
+                options.AddPolicy(Capabilities.DeleteTeacher, p => p.RequireClaim("Capability", Capabilities.DeleteTeacher));
+                options.AddPolicy(Capabilities.ViewStudents, p => p.RequireClaim("Capability", Capabilities.ViewStudents));
+                options.AddPolicy(Capabilities.EditStudent, p => p.RequireClaim("Capability", Capabilities.EditStudent));
+                options.AddPolicy(Capabilities.DeleteStudent, p => p.RequireClaim("Capability", Capabilities.DeleteStudent));
+                options.AddPolicy(Capabilities.InsertCourse, p => p.RequireClaim("Capability", Capabilities.InsertCourse));
+                options.AddPolicy(Capabilities.ViewCourses, p => p.RequireClaim("Capability", Capabilities.ViewCourses));
+                options.AddPolicy(Capabilities.ViewCourse, p => p.RequireClaim("Capability", Capabilities.ViewCourse));
+                options.AddPolicy(Capabilities.EditCourse, p => p.RequireClaim("Capability", Capabilities.EditCourse));
+                options.AddPolicy(Capabilities.DeleteCourse, p => p.RequireClaim("Capability", Capabilities.DeleteCourse));
+                options.AddPolicy(Capabilities.EnrollStudent, p => p.RequireClaim("Capability", Capabilities.EnrollStudent));
+                options.AddPolicy(Capabilities.UnenrollStudent, p => p.RequireClaim("Capability", Capabilities.UnenrollStudent));
             });
 
             builder.Services.AddSingleton<IAuthorizationHandler, OwnerOrCapabilityHandler>();

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using SchoolApp.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SchoolApp.Core;
 using SchoolApp.Core.Filters;
@@ -34,7 +35,7 @@ public class StudentsController : ControllerBase
     /// <response code="403">If the user lacks permission to register students.</response>
     /// <response code="409">If the username, email or AM already exists.</response>
     [HttpPost]
-    [Authorize(Policy = "INSERT_STUDENT")]
+    [Authorize(Policy = Capabilities.InsertStudent)]
     [ProducesResponseType(typeof(PreRegistrationResultDTO), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -63,7 +64,7 @@ public class StudentsController : ControllerBase
     /// <response code="401">If the request is not authenticated.</response>
     /// <response code="403">If the user lacks permission to list students.</response>
     [HttpGet]
-    [Authorize(Policy = "VIEW_STUDENTS")]
+    [Authorize(Policy = Capabilities.ViewStudents)]
     [ProducesResponseType(typeof(PaginatedResult<StudentReadOnlyDTO>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -100,7 +101,7 @@ public class StudentsController : ControllerBase
         var student = await _applicationService.StudentService.GetStudentByIdAsync(id);
 
         var authResult = await _authorizationService.AuthorizeAsync(
-            User, student.UserId, new OwnerOrCapabilityRequirement("VIEW_STUDENT"));
+            User, student.UserId, new OwnerOrCapabilityRequirement(Capabilities.ViewStudent));
 
         if (!authResult.Succeeded)
         {
@@ -136,7 +137,7 @@ public class StudentsController : ControllerBase
         var student = await _applicationService.StudentService.GetStudentByIdAsync(id);
 
         var authResult = await _authorizationService.AuthorizeAsync(
-            User, student.UserId, new OwnerOrCapabilityRequirement("VIEW_COURSES"));
+            User, student.UserId, new OwnerOrCapabilityRequirement(Capabilities.ViewCourses));
 
         if (!authResult.Succeeded)
         {
@@ -162,7 +163,7 @@ public class StudentsController : ControllerBase
     /// <response code="404">If the student does not exist.</response>
     /// <response code="409">If the email is already used by another user.</response>
     [HttpPut("{id:int}")]
-    [Authorize(Policy = "EDIT_STUDENT")]
+    [Authorize(Policy = Capabilities.EditStudent)]
     [ProducesResponseType(typeof(StudentReadOnlyDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -185,7 +186,7 @@ public class StudentsController : ControllerBase
     /// <response code="403">If the user lacks permission to delete students.</response>
     /// <response code="404">If the student does not exist.</response>
     [HttpDelete("{id:int}")]
-    [Authorize(Policy = "DELETE_STUDENT")]
+    [Authorize(Policy = Capabilities.DeleteStudent)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

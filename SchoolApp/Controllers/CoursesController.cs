@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using SchoolApp.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SchoolApp.Core;
 using SchoolApp.DTO;
@@ -27,7 +28,7 @@ public class CoursesController : ControllerBase
     /// <response code="401">If the request is not authenticated.</response>
     /// <response code="403">If the user lacks permission to create courses.</response>
     [HttpPost]
-    [Authorize(Policy = "INSERT_COURSE")]
+    [Authorize(Policy = Capabilities.InsertCourse)]
     [ProducesResponseType(typeof(CourseReadOnlyDTO), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -53,7 +54,7 @@ public class CoursesController : ControllerBase
     /// <response code="401">If the request is not authenticated.</response>
     /// <response code="403">If the user lacks permission to list courses.</response>
     [HttpGet]
-    [Authorize(Policy = "VIEW_COURSES")]
+    [Authorize(Policy = Capabilities.ViewCourses)]
     [ProducesResponseType(typeof(PaginatedResult<CourseReadOnlyDTO>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -75,7 +76,7 @@ public class CoursesController : ControllerBase
     /// <response code="403">If the user lacks permission to view courses.</response>
     /// <response code="404">If the course does not exist.</response>
     [HttpGet("{id:int}")]
-    [Authorize(Policy = "VIEW_COURSE")]
+    [Authorize(Policy = Capabilities.ViewCourse)]
     [ProducesResponseType(typeof(CourseReadOnlyDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -98,7 +99,7 @@ public class CoursesController : ControllerBase
     /// <response code="403">If the user lacks permission to edit courses.</response>
     /// <response code="404">If the course does not exist.</response>
     [HttpPut("{id:int}")]
-    [Authorize(Policy = "EDIT_COURSE")]
+    [Authorize(Policy = Capabilities.EditCourse)]
     [ProducesResponseType(typeof(CourseReadOnlyDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -120,7 +121,7 @@ public class CoursesController : ControllerBase
     /// <response code="403">If the user lacks permission to delete courses.</response>
     /// <response code="404">If the course does not exist.</response>
     [HttpDelete("{id:int}")]
-    [Authorize(Policy = "DELETE_COURSE")]
+    [Authorize(Policy = Capabilities.DeleteCourse)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -142,7 +143,7 @@ public class CoursesController : ControllerBase
     /// <response code="404">If the course or the student does not exist.</response>
     /// <response code="409">If the student is already enrolled in the course.</response>
     [HttpPost("{courseId:int}/students/{studentId:int}")]
-    [Authorize(Policy = "ENROLL_STUDENT")]
+    [Authorize(Policy = Capabilities.EnrollStudent)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -164,7 +165,7 @@ public class CoursesController : ControllerBase
     /// <response code="403">If the user lacks permission to remove students from courses.</response>
     /// <response code="404">If the course does not exist or the student is not enrolled in it.</response>
     [HttpDelete("{courseId:int}/students/{studentId:int}")]
-    [Authorize(Policy = "UNENROLL_STUDENT")]
+    [Authorize(Policy = Capabilities.UnenrollStudent)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

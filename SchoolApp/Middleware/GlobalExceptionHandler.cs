@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SchoolApp.Exceptions;
 
-namespace SchoolApp.Helpers;
+namespace SchoolApp.Middleware;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {
