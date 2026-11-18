@@ -35,21 +35,9 @@ public class UserRepository : BaseRepository<User>, IUserRepository       // fir
             }
         }
 
-        int totalRecords = await query.CountAsync();                                                       // is being executed
-
-        if (pageNumber < 1) pageNumber = 1;
-        if (pageSize < 1) pageSize = PaginationDefaults.DefaultPageSize;
-        if (pageSize > PaginationDefaults.MaxPageSize) pageSize = PaginationDefaults.MaxPageSize;
-
-        int skip = (pageNumber - 1) * pageSize;      // number of pages we skip. pageNumber - 1 beacause in Db it starts.
-                                                     // from 0. it works as offset.
-        var data = await query
-            .OrderBy(u => u.Id)                 // Paginated always with OrderBy BEFORE skip !!!!
-            .Skip(skip)
-            .Take(pageSize)
-            .ToListAsync();                                                                          // is being executed
-
-        return new PaginatedResult<User>(data, totalRecords, pageNumber, pageSize);
+        return await query
+            .OrderBy(u => u.Id)
+            .ToPaginatedResultAsync(pageNumber, pageSize);
     }
 
     public override async Task<User?> GetAsync(int id)
