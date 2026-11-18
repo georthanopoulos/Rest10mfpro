@@ -25,7 +25,7 @@ public class MustChangePasswordMiddleware
             {
                 Status = StatusCodes.Status403Forbidden,
                 Title = "Password change required",
-                Detail = "You must change your temporary password before using the API."
+                Detail = "You must change your temporary password before using the API. Use POST /api/v1/auth/change-password."
             });
             return;
         }

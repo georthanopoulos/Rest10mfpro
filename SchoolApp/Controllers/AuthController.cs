@@ -22,8 +22,8 @@ public class AuthController : ControllerBase
     /// Authenticates a user and returns a JWT token if credentials are valid.
     /// </summary>
     /// <param name="userLoginDTO">The user login credentials.</param>
-    /// <returns>A JWT token for the authenticated user.</returns>
-    /// <response code="200">Returns the JWT token.</response>
+    /// <returns>A JWT token for the authenticated user, plus a flag telling whether the user must change the password before using the API.</returns>
+    /// <response code="200">Returns the JWT token and the mustChangePassword flag.</response>
     /// <response code="400">If the request body is invalid.</response>
     /// <response code="401">If the credentials are invalid or the account is not active.</response>
     [HttpPost("login")]
@@ -38,7 +38,11 @@ public class AuthController : ControllerBase
 
         var token = _applicationService.UserService.CreateUserToken(user);
 
-        return Ok(new JwtTokenDTO(token));
+        string? message = user.MustChangePassword
+        ? "You must change your temporary password. Use POST /api/v1/auth/change-password before using any other endpoint."
+        : null;
+
+        return Ok(new JwtTokenDTO(token, user.MustChangePassword, message));
     }
 
     /// <summary>
