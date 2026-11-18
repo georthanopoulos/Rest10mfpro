@@ -22,21 +22,6 @@ public class DbSeeder
 
     public async Task SeedAsync()
     {
-        List<string> roleNames = new() { "ADMIN", "EMPLOYEE", "TEACHER", "STUDENT" };
-
-
-        foreach (var roleName in roleNames)
-        {
-            bool exists = await _context.Roles.AnyAsync(r => r.Name == roleName);
-
-            if (!exists)
-            {
-                _context.Roles.Add(new Role { Name = roleName });
-            }
-        }
-
-        await _context.SaveChangesAsync();
-
         string? adminUsername = _configuration["Seed:AdminUsername"];
         string? adminEmail = _configuration["Seed:AdminEmail"];
         string? adminPassword = _configuration["Seed:AdminPassword"];
@@ -49,8 +34,8 @@ public class DbSeeder
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(adminUsername) 
-            || string.IsNullOrWhiteSpace(adminEmail) 
+        if (string.IsNullOrWhiteSpace(adminUsername)
+            || string.IsNullOrWhiteSpace(adminEmail)
             || string.IsNullOrWhiteSpace(adminPassword))
         {
             throw new InvalidOperationException("Missing admin seed settings:" +
@@ -76,7 +61,5 @@ public class DbSeeder
         await _context.SaveChangesAsync();
         
         _logger.LogInformation("Admin user with username={Username} created successfully.", adminUsername);
-
-
     }
 }

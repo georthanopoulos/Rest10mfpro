@@ -38,8 +38,9 @@ public class TeacherRepository : BaseRepository<Teacher>, ITeacherRepository
         int totalRecords = await query.CountAsync();          // is being executed
 
         if (pageNumber < 1) pageNumber = 1;
-        if (pageSize < 1) pageSize = 10;
-        
+        if (pageSize < 1) pageSize = PaginationDefaults.DefaultPageSize;
+        if (pageSize > PaginationDefaults.MaxPageSize) pageSize = PaginationDefaults.MaxPageSize;
+
         int skip = (pageNumber - 1) * pageSize;      // number of pages we skip. pageNumber - 1 because in Db it starts.
                                                      // from 0. it works as offset.
         var data = await query
