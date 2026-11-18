@@ -77,4 +77,9 @@ public class CourseRepository : BaseRepository<Course>, ICourseRepository
             .OrderBy(c => c.Id)
             .ToPaginatedResultAsync(pageNumber, pageSize);
     }
+
+    public async Task<bool> TeacherHasCoursesAsync(int teacherId)
+    {
+        return await _context.Courses.AnyAsync(c => c.TeacherId == teacherId);
+    }
 }

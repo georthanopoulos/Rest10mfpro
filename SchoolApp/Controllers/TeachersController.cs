@@ -183,12 +183,14 @@ public class TeachersController : ControllerBase
     /// <response code="401">If the request is not authenticated.</response>
     /// <response code="403">If the user lacks permission to delete teachers.</response>
     /// <response code="404">If the teacher does not exist.</response>
+    /// <response code="409">If the teacher still has courses assigned.</response>
     [HttpDelete("{id:int}")]
     [Authorize(Policy = Capabilities.DeleteTeacher)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult> DeleteTeacher(int id)
     {
         await _applicationService.TeacherService.DeleteTeacherAsync(id);

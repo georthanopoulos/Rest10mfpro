@@ -68,6 +68,7 @@ public class GlobalExceptionHandler : IExceptionHandler
     private static (int StatusCode, string Title, bool IsExpected) MapException(Exception ex) => ex switch
     {
         EntityAlreadyExistsException => (StatusCodes.Status409Conflict, "Resource Already exists", true),
+        EntityConflictException => (StatusCodes.Status409Conflict, "Conflict", true),
         EntityNotFoundException => (StatusCodes.Status404NotFound, "Resource not found", true),
         InvalidArgumentException => (StatusCodes.Status400BadRequest, "Invalid Argument", true),
         EntityNotAuthorizedException => (StatusCodes.Status401Unauthorized, "Unauthenticated", true),

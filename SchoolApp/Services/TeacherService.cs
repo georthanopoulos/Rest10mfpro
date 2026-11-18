@@ -188,6 +188,11 @@ public class TeacherService : ITeacherService
             throw new EntityNotFoundException("Teacher", $"Teacher with id={id} not found.");
         }
 
+        if (await _unitOfWork.CourseRepository.TeacherHasCoursesAsync(id))
+        {
+            throw new EntityConflictException("Teacher", "Teacher has courses. Reassign or delete them first.");
+        }
+
         var now = DateTime.UtcNow;
 
         teacher.IsDeleted = true;
