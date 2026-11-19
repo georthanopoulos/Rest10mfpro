@@ -39,7 +39,7 @@ public class CourseRepository : BaseRepository<Course>, ICourseRepository
     {
         return await _context.Courses
             .Include(c => c.Teacher)
-                .ThenInclude(t => t.User)
+                .ThenInclude(t => t!.User)
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
@@ -47,7 +47,7 @@ public class CourseRepository : BaseRepository<Course>, ICourseRepository
     {
         IQueryable<Course> query = _context.Courses
             .Include(c => c.Teacher)
-                .ThenInclude(t => t.User);
+                .ThenInclude(t => t!.User);
 
         return await query
             .OrderBy(c => c.Id)
@@ -59,7 +59,7 @@ public class CourseRepository : BaseRepository<Course>, ICourseRepository
         IQueryable<Course> query = _context.Courses
             .Where(c => c.TeacherId == teacherId)
             .Include(c => c.Teacher)
-                .ThenInclude(t => t.User);
+                .ThenInclude(t => t!.User);
 
         return await query
             .OrderBy(c => c.Id)
@@ -71,7 +71,7 @@ public class CourseRepository : BaseRepository<Course>, ICourseRepository
         IQueryable<Course> query = _context.Courses
             .Where(c => c.Students.Any(s => s.Id == studentId))
             .Include(c => c.Teacher)
-                .ThenInclude(t => t.User);
+                .ThenInclude(t => t!.User);
 
         return await query
             .OrderBy(c => c.Id)
