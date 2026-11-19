@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using SchoolApp.Core;
 using SchoolApp.Core.Filters;
 using SchoolApp.DTO;
@@ -8,18 +6,15 @@ using SchoolApp.Exceptions;
 using SchoolApp.Models;
 using SchoolApp.Repositories;
 using SchoolApp.Security;
-using Serilog.Sinks.SystemConsole.Themes;
-using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 
 namespace SchoolApp.Services;
 
 public class TeacherService : ITeacherService
 {
-
     private readonly IActivationTokenUtil _activationTokenUtil;
     private readonly IUnitOfWork _unitOfWork;
-    private IMapper _mapper;
+    private readonly IMapper _mapper;
     private readonly ILogger<TeacherService> _logger;
 
     public TeacherService(IActivationTokenUtil activationTokenUtil,
