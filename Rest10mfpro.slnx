@@ -7,5 +7,6 @@
     <File Path="docker-compose.yml" />
     <File Path="Dockerfile" />
   </Folder>
+  <Project Path="SchoolApp.Tests/SchoolApp.Tests.csproj" />
   <Project Path="SchoolApp/SchoolApp.csproj" />
 </Solution>
