@@ -66,8 +66,11 @@ public class AuthController : ControllerBase
 
     /// <summary>
     /// Changes the password of the authenticated user.
-    /// Also the only endpoint allowed while a password change is required.
+    /// Together with login, this is the only endpoint allowed while a password change is required.
     /// </summary>
+    /// <remarks>
+    /// If the account had a temporary password, log in again after a successful change to get a token without the password-change restriction.
+    /// </remarks>
     /// <param name="request">The current and the new password.</param>
     /// <response code="204">If the password was changed.</response>
     /// <response code="400">If the request body is invalid, the current password is wrong

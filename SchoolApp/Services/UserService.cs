@@ -181,9 +181,7 @@ public class UserService : IUserService
         return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
     }
 
-    /// <remarks>
-    /// If the account had a temporary password, log in again after a successful change to get a token without the password-change restriction.
-    /// </remarks>
+    
     public async Task ChangePasswordAsync(int userId, ChangePasswordDTO request)
     {
         User? user = await _unitOfWork.UserRepository.GetAsync(userId);
