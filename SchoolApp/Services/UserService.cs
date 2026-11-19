@@ -18,39 +18,49 @@ public class UserService : IUserService
 {
     private readonly IEncryptionUtil _encryptionUtil;
     private readonly IUnitOfWork _unitOfWork;
-    private IMapper _mapper;
+    private readonly IMapper _mapper;
     private readonly ILogger<UserService> _logger;
     private readonly IConfiguration _configuration;
+    private readonly IActivationTokenUtil _activationTokenUtil;
 
     public UserService(IEncryptionUtil encryptionUtil, IUnitOfWork unitOfWork,
-        IMapper mapper, ILogger<UserService> logger, IConfiguration configuration)
+        IMapper mapper, ILogger<UserService> logger, IConfiguration configuration, IActivationTokenUtil activationTokenUtil)
     {
         _encryptionUtil = encryptionUtil;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
         _configuration = configuration;
+        _activationTokenUtil = activationTokenUtil;
     }
 
     public async Task<PaginatedResult<UserReadOnlyDTO>> GetPaginatedUsersFilteredAsync(int pageNumber, int pageSize,
-        UserFiltersDTO userFiltersDTO)
+        UserFiltersDTO filters)
     {
-        List<User> users = [];
+
         List<Expression<Func<User, bool>>> predicates = [];
 
-        if (!string.IsNullOrEmpty(userFiltersDTO.Username))
+        if (!string.IsNullOrEmpty(filters.Username))
         {
-            predicates.Add(u => u.Username == userFiltersDTO.Username);
+            predicates.Add(u => u.Username == filters.Username);
         }
 
-        if (!string.IsNullOrEmpty(userFiltersDTO.Email))
+        if (!string.IsNullOrEmpty(filters.Email))
         {
-            predicates.Add(u => u.Email == userFiltersDTO.Email);
+            predicates.Add(u => u.Email == filters.Email);
         }
 
-        if (!string.IsNullOrEmpty(userFiltersDTO.UserRole))
+        if (!string.IsNullOrEmpty(filters.UserRole))
         {
-            predicates.Add(u => u.Role.Name == userFiltersDTO.UserRole);
+            string[] validRoles = { "ADMIN", "EMPLOYEE", "TEACHER", "STUDENT" };
+
+            if (!validRoles.Contains(filters.UserRole))
+            { 
+                throw new InvalidArgumentException("UserRole",
+                    $"Unknown role '{filters.UserRole}'. Valid roles: {string.Join(", ", validRoles)}.");
+            }
+
+            predicates.Add(u => u.Role.Name == filters.UserRole);
         }
 
         var paginatedResult = await _unitOfWork.UserRepository.GetUsersAsync(pageNumber, pageSize, predicates);
@@ -67,19 +77,17 @@ public class UserService : IUserService
         return dtoResult;
     }
 
-    public async Task<UserReadOnlyDTO?> GetUserByUsernameAsync(string username)
+    public async Task<UserReadOnlyDTO> GetUserByUsernameAsync(string username)
     {
-        
         User? user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
 
         if (user is null)
         {
-            throw new EntityNotFoundException("User", "Enity not found.");
+            throw new EntityNotFoundException("User", "Entity not found.");
         }
 
         _logger.LogInformation("User found with username={Username}", username);
         return _mapper.Map<UserReadOnlyDTO>(user);
-     
     }
 
     public async Task<UserReadOnlyDTO> GetUserByIdAsync(int id)
@@ -95,16 +103,51 @@ public class UserService : IUserService
         return _mapper.Map<UserReadOnlyDTO>(user);
     }
 
-    public async Task<User?> VerifyAndGetUserAsync(UserLoginDTO credentials)
+    // Used only to burn the same CPU time when the user does not exist
+    private static readonly string DummyPasswordHash = BCrypt.Net.BCrypt.HashPassword("dummy-password");
+
+    public async Task<User> VerifyAndGetUserAsync(UserLoginDTO credentials)
     {
         User? user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(credentials.Username!);
 
-        if (user is null || !_encryptionUtil.IsValidPassword(credentials.Password!, user.Password))
+        // Always run one password check, so the response time does not reveal
+        // whether the username exists
+        string hashToCheck = user?.Password ?? DummyPasswordHash;
+        bool isPasswordValid = _encryptionUtil.IsValidPassword(credentials.Password!, hashToCheck);
+
+        if (user is null
+            || user.Status != AccountStatus.Active
+            || user.Password is null
+            || !isPasswordValid)
         {
             throw new EntityNotAuthorizedException("Auth", "Bad Credentials");
         }
+
         _logger.LogInformation("User with username={Username} verified for login.", credentials.Username);
         return user;
+    }
+
+    public async Task ActivateAccountAsync(ActivateAccountDTO request)
+    {
+        string tokenHash = _activationTokenUtil.Hash(request.Token!);
+
+        ActivationToken? activationToken = await _unitOfWork.ActivationTokenRepository.GetByHashAsync(tokenHash);
+
+        if (activationToken is null
+            || activationToken.UsedAt is not null
+            || activationToken.ExpiresAt < DateTime.UtcNow
+            || activationToken.User.Status != AccountStatus.Pending)
+        {
+            throw new InvalidArgumentException("ActivationToken", "Invalid or expired activation token.");
+        }
+
+        activationToken.User.Password = _encryptionUtil.Encrypt(request.Password!);
+        activationToken.User.Status = AccountStatus.Active;
+        activationToken.UsedAt = DateTime.UtcNow;
+
+        await _unitOfWork.SaveAsync();
+
+        _logger.LogInformation("User with id={Id} activated the account.", activationToken.User.Id);
     }
 
     public string CreateUserToken(User user)
@@ -118,7 +161,8 @@ public class UserService : IUserService
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.Username),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role.Name)
+            new Claim(ClaimTypes.Role, user.Role.Name),
+            new Claim("MustChangePassword", user.MustChangePassword.ToString())
 
         };
 
@@ -135,5 +179,33 @@ public class UserService : IUserService
 
         // Serialize the token to a string
         return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+    }
+
+    
+    public async Task ChangePasswordAsync(int userId, ChangePasswordDTO request)
+    {
+        User? user = await _unitOfWork.UserRepository.GetAsync(userId);
+
+        if (user == null || user.Status != AccountStatus.Active || user.Password == null)
+        {
+            throw new EntityNotAuthorizedException("User", "Bad Credentials");
+        }
+
+        if (!_encryptionUtil.IsValidPassword(request.CurrentPassword!, user.Password))
+        {
+            throw new InvalidArgumentException("CurrentPassword", "Current password is incorrect.");
+        }
+
+        if (_encryptionUtil.IsValidPassword(request.NewPassword!, user.Password))
+        {
+            throw new InvalidArgumentException("NewPassword", "New password must differ from the current one.");
+        }
+
+        user.Password = _encryptionUtil.Encrypt(request.NewPassword!);
+        user.MustChangePassword = false;
+
+        await _unitOfWork.SaveAsync();
+
+        _logger.LogInformation("Password has changed for user with id={id}.", userId);
     }
 }

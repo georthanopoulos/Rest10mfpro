@@ -1,8 +1,19 @@
-﻿using SchoolApp.DTO;
+﻿using SchoolApp.Core;
+using SchoolApp.Core.Filters;
+using SchoolApp.DTO;
 
 namespace SchoolApp.Services;
 
 public interface ITeacherService
-{
-    Task<UserReadOnlyDTO> SignUpUserAsync(TeacherSignupDTO request);
+{   
+    Task<PreRegistrationResultDTO> PreRegisterAsync(TeacherPreRegisterDTO request);
+
+    Task<PaginatedResult<TeacherReadOnlyDTO>> GetPaginatedTeachersFilteredAsync(int pageNumber,
+        int pageSize, TeacherFiltersDTO filters);
+    
+    Task<TeacherReadOnlyDTO> GetTeacherByIdAsync(int id);
+
+    Task<TeacherReadOnlyDTO> UpdateTeacherAsync(int id, TeacherUpdateDTO request);
+
+    Task DeleteTeacherAsync(int id);
 }

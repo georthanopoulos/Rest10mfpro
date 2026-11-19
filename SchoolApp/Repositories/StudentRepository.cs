@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SchoolApp.Core;
 using SchoolApp.Data;
 using SchoolApp.Models;
+using System.Linq.Expressions;
 
 namespace SchoolApp.Repositories;
 
@@ -14,6 +16,7 @@ public class StudentRepository : BaseRepository<Student>, IStudentRepository
     {
         return await _context.Students
             .Where(s => s.Am == am)
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync();
     }
 
@@ -27,5 +30,32 @@ public class StudentRepository : BaseRepository<Student>, IStudentRepository
             .ToListAsync();
 
         return courses;
+    }
+
+    public async Task<PaginatedResult<User>> GetPaginatedUsersStudentsAsync(int pageNumber, int pageSize,
+        List<Expression<Func<User, bool>>> predicates)
+    {
+        IQueryable<User> query = _context.Users
+            .Include(u => u.Student)                     // only for users that are students!
+            .Where(u => u.Student != null);
+
+        if (predicates is not null && predicates.Count > 0)
+        {
+            foreach (var predicate in predicates)
+            {
+                query = query.Where(predicate);                // AND is implied here.
+            }
+        }
+
+        return await query
+            .OrderBy(u => u.Id)
+            .ToPaginatedResultAsync(pageNumber, pageSize);
+    }
+
+    public override async Task<Student?> GetAsync(int id)
+    {
+        return await _context.Students
+            .Include(s => s.User)
+            .FirstOrDefaultAsync(s => s.Id == id);
     }
 }

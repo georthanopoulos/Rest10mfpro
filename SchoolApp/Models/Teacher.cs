@@ -6,7 +6,7 @@
 
         public string Institution { get; set; } = null!;
 
-        public string? PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; } = null!;
 
         public int UserId { get; set; }
 

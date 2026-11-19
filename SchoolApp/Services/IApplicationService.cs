@@ -6,7 +6,9 @@ public interface IApplicationService
 
     ITeacherService TeacherService { get; }
 
-    //IStudentService StudentService { get; }
+    IStudentService StudentService { get; }
+
+    ICourseService CourseService { get; }
 
     // OtherService can be added { get; }
 }

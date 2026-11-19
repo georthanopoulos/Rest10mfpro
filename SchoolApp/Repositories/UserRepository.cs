@@ -4,6 +4,7 @@ using SchoolApp.Data;
 using SchoolApp.Models;
 using System.Linq.Expressions;
 
+
 namespace SchoolApp.Repositories;
 
 public class UserRepository : BaseRepository<User>, IUserRepository       // first right click on IUserRepository and implement. And Then right click on UserRepository and generate.
@@ -23,7 +24,8 @@ public class UserRepository : BaseRepository<User>, IUserRepository       // fir
     public async Task<PaginatedResult<User>> GetUsersAsync(int pageNumber, int pageSize,
         List<Expression<Func<User, bool>>> predicates)
     {
-        IQueryable<User> query = _context.Users;                // is NOT being executed yet.
+        IQueryable<User> query = _context.Users                // is NOT being executed yet.
+            .Include(u => u.Role);
 
         if (predicates is not null && predicates.Count > 0)
         {
@@ -33,19 +35,25 @@ public class UserRepository : BaseRepository<User>, IUserRepository       // fir
             }
         }
 
-        int totalRecords = await query.CountAsync();                                                       // is being executed
+        return await query
+            .OrderBy(u => u.Id)
+            .ToPaginatedResultAsync(pageNumber, pageSize);
+    }
 
-        if (pageNumber < 1) pageNumber = 1;
-        if (pageSize < 1) pageSize = 10;
+    public override async Task<User?> GetAsync(int id)
+    {
+        return await _context.Users
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Id == id);
+    }
 
-        int skip = (pageNumber - 1) * pageSize;      // number of pages we skip. pageNumber - 1 beacause in Db it starts.
-                                                     // from 0. it works as offset.
-        var data = await query
-            .OrderBy(u => u.Id)                 // Paginated always with OrderBy BEFORE skip !!!!
-            .Skip(skip)
-            .Take(pageSize)
-            .ToListAsync();                                                                          // is being executed
+    public async Task<bool> UsernameOrEmailExistsAsync(string username, string email)
+    {
+        return await _context.Users.IgnoreQueryFilters().AnyAsync(u => u.Username == username || u.Email == email);
+    }
 
-        return new PaginatedResult<User>(data, totalRecords, pageNumber, pageSize);
+    public async Task<User?> GetByEmailAsync(string email)
+    {
+        return await _context.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Email == email);
     }
 }

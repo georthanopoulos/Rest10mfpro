@@ -38,6 +38,213 @@ namespace SchoolApp.Migrations
                     b.HasIndex("RolesId");
 
                     b.ToTable("RolesCapabilities");
+
+                    b.HasData(
+                        new
+                        {
+                            CapabilitiesId = 6,
+                            RolesId = 3
+                        },
+                        new
+                        {
+                            CapabilitiesId = 12,
+                            RolesId = 4
+                        },
+                        new
+                        {
+                            CapabilitiesId = 1,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 2,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 3,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 7,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 8,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 9,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 14,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 15,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 18,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 20,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 21,
+                            RolesId = 2
+                        },
+                        new
+                        {
+                            CapabilitiesId = 1,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 2,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 3,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 4,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 5,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 6,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 7,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 8,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 9,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 10,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 11,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 12,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 13,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 14,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 15,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 16,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 17,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 18,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 19,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 20,
+                            RolesId = 1
+                        },
+                        new
+                        {
+                            CapabilitiesId = 21,
+                            RolesId = 1
+                        });
+                });
+
+            modelBuilder.Entity("SchoolApp.Models.ActivationToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "UserId" }, "IX_ActivationTokens_UserId");
+
+                    b.HasIndex(new[] { "TokenHash" }, "UQ_ActivationTokens_TokenHash")
+                        .IsUnique();
+
+                    b.ToTable("ActivationTokens");
                 });
 
             modelBuilder.Entity("SchoolApp.Models.Capability", b =>
@@ -63,6 +270,134 @@ namespace SchoolApp.Migrations
                         .IsUnique();
 
                     b.ToTable("Capabilities");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Create a new teacher",
+                            Name = "INSERT_TEACHER"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "View teacher list and details",
+                            Name = "VIEW_TEACHERS"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "View teacher",
+                            Name = "VIEW_TEACHER"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Modify existing teacher",
+                            Name = "EDIT_TEACHER"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Remove a teacher",
+                            Name = "DELETE_TEACHER"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "View only own teacher details",
+                            Name = "VIEW_ONLY_TEACHER"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "Create a new student",
+                            Name = "INSERT_STUDENT"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Description = "View student list and details",
+                            Name = "VIEW_STUDENTS"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Description = "View student",
+                            Name = "VIEW_STUDENT"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Description = "Modify existing student",
+                            Name = "EDIT_STUDENT"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Description = "Remove a student",
+                            Name = "DELETE_STUDENT"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Description = "View only own student details",
+                            Name = "VIEW_ONLY_STUDENT"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Description = "Create a new course",
+                            Name = "INSERT_COURSE"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Description = "View course list and details",
+                            Name = "VIEW_COURSES"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Description = "View course",
+                            Name = "VIEW_COURSE"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Description = "Modify existing course",
+                            Name = "EDIT_COURSE"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Description = "Remove a course",
+                            Name = "DELETE_COURSE"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Description = "View the list of all users (registry)",
+                            Name = "VIEW_USERS"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Description = "Create another admin user",
+                            Name = "INSERT_ADMIN"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Description = "Enroll a student in a course",
+                            Name = "ENROLL_STUDENT"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Description = "Remove a student from a course",
+                            Name = "UNENROLL_STUDENT"
+                        });
                 });
 
             modelBuilder.Entity("SchoolApp.Models.Course", b =>
@@ -73,7 +408,7 @@ namespace SchoolApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
@@ -121,6 +456,28 @@ namespace SchoolApp.Migrations
                         .IsUnique();
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "EMPLOYEE"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "TEACHER"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "STUDENT"
+                        });
                 });
 
             modelBuilder.Entity("SchoolApp.Models.Student", b =>
@@ -136,7 +493,7 @@ namespace SchoolApp.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<DateTime>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Department")
@@ -181,7 +538,7 @@ namespace SchoolApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("InsertedAt")
@@ -199,6 +556,7 @@ namespace SchoolApp.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -208,6 +566,9 @@ namespace SchoolApp.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "Institution" }, "IX_Teachers_Institution");
+
+                    b.HasIndex(new[] { "PhoneNumber" }, "UQ_Teachers_PhoneNumber")
+                        .IsUnique();
 
                     b.HasIndex(new[] { "UserId" }, "UQ_Teachers_UserId")
                         .IsUnique();
@@ -223,7 +584,7 @@ namespace SchoolApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
@@ -250,13 +611,20 @@ namespace SchoolApp.Migrations
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("MustChangePassword")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -306,6 +674,18 @@ namespace SchoolApp.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SchoolApp.Models.ActivationToken", b =>
+                {
+                    b.HasOne("SchoolApp.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_ActivationTokens_Users_UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SchoolApp.Models.Course", b =>
                 {
                     b.HasOne("SchoolApp.Models.Teacher", "Teacher")
@@ -345,7 +725,7 @@ namespace SchoolApp.Migrations
                     b.HasOne("SchoolApp.Models.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_Users_Roles_RoleId");
 

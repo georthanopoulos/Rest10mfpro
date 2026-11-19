@@ -20,6 +20,8 @@ public class SchoolRest10Context : DbContext
 
     public DbSet<User> Users { get; set; }
 
+    public DbSet<ActivationToken> ActivationTokens { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Teacher>(entity =>
@@ -34,7 +36,10 @@ public class SchoolRest10Context : DbContext
             .HasConstraintName("FK_Teachers_Users_UserId");
 
             entity.HasIndex(e => e.Institution, "IX_Teachers_Institution");
+            entity.HasIndex(e => e.PhoneNumber, "UQ_Teachers_PhoneNumber").IsUnique();
             entity.HasIndex(e => e.UserId, "UQ_Teachers_UserId").IsUnique();
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
         });
 
         modelBuilder.Entity<Student>(entity =>
@@ -51,6 +56,8 @@ public class SchoolRest10Context : DbContext
             entity.HasIndex(e => e.Am, "UQ_Students_Am").IsUnique();
             entity.HasIndex(e => e.Institution, "IX_Students_Institution");
             entity.HasIndex(e => e.UserId, "UQ_Students_UserId").IsUnique();
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
         });
 
         modelBuilder.Entity<Course>(entity =>
@@ -73,26 +80,73 @@ public class SchoolRest10Context : DbContext
 
             entity.HasIndex(e => e.Description, "IX_Courses_Description");
             entity.HasIndex(e => e.TeacherId, "IX_Courses_TeacherId");
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
         });
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.Property(e => e.Name).HasMaxLength(50);
+        entity.Property(e => e.Name).HasMaxLength(50);
 
-            entity.HasMany(d => d.Capabilities).WithMany(p => p.Roles)
-                .UsingEntity("RolesCapabilities", j =>         // for the first term of the complex element RoleCapabilities it has index automatically. BUT for the second term (capabilities) we need to define one.
-                {
-                    j.HasIndex("CapabilitiesId").HasDatabaseName("IX_RolesCapabilities_CapabilityId");
-                });
+        entity.HasMany(d => d.Capabilities).WithMany(p => p.Roles)
+            .UsingEntity("RolesCapabilities", j =>         // for the first term of the complex element RoleCapabilities it has index automatically. BUT for the second term (capabilities) we need to define one.
+            {
+                j.HasIndex("CapabilitiesId").HasDatabaseName("IX_RolesCapabilities_CapabilityId");
+                j.HasData(new { RolesId = 3, CapabilitiesId = 6 });        // TEACHER (3): view only teacher
+                j.HasData(new { RolesId = 4, CapabilitiesId = 12 });       // STUDENT (4): view only student
+                j.HasData(                                                 // EMPLOYEE (2): insert teacher/student, view teachers/students/courses, view users, to enroll/unenroll students
+                new { RolesId = 2, CapabilitiesId = 1 },
+                new { RolesId = 2, CapabilitiesId = 2 },
+                new { RolesId = 2, CapabilitiesId = 3 },
+                new { RolesId = 2, CapabilitiesId = 7 },
+                new { RolesId = 2, CapabilitiesId = 8 },
+                new { RolesId = 2, CapabilitiesId = 9 },
+                new { RolesId = 2, CapabilitiesId = 14 },
+                new { RolesId = 2, CapabilitiesId = 15 },
+                new { RolesId = 2, CapabilitiesId = 18 },
+                new { RolesId = 2, CapabilitiesId = 20 },
+                new { RolesId = 2, CapabilitiesId = 21 });
+                j.HasData(Enumerable.Range(1, 21)                           // ADMIN (1): ALL 21 rights reserved. The command produces all numbers from 1 up to 21 and with Select a line for each one is created, instead of writing 21 lines of code.
+                       .Select(id => new { RolesId = 1, CapabilitiesId = id }));
 
-            entity.HasIndex(e => e.Name, "UQ_Roles_Name").IsUnique();
+            });
+
+        entity.HasIndex(e => e.Name, "UQ_Roles_Name").IsUnique();
+
+        entity.HasData(new Role { Id = 1, Name = "ADMIN" },
+            new Role { Id = 2, Name = "EMPLOYEE"},
+            new Role { Id = 3, Name = "TEACHER" },
+            new Role { Id = 4, Name = "STUDENT"});
         });
 
         modelBuilder.Entity<Capability>(entity =>
         {
-            entity.Property(e => e.Description).HasMaxLength(255);
-            entity.Property(e => e.Name).HasMaxLength(100);
-            entity.HasIndex(e => e.Name, "UQ_Capabilities_Name").IsUnique();
+        entity.Property(e => e.Description).HasMaxLength(255);
+        entity.Property(e => e.Name).HasMaxLength(100);
+        entity.HasIndex(e => e.Name, "UQ_Capabilities_Name").IsUnique();
+
+            entity.HasData(
+            new Capability { Id = 1, Name = "INSERT_TEACHER", Description = "Create a new teacher" },
+            new Capability { Id = 2, Name = "VIEW_TEACHERS", Description = "View teacher list and details" },
+            new Capability { Id = 3, Name = "VIEW_TEACHER", Description = "View teacher" },
+            new Capability { Id = 4, Name = "EDIT_TEACHER", Description = "Modify existing teacher" },
+            new Capability { Id = 5, Name = "DELETE_TEACHER", Description = "Remove a teacher" },
+            new Capability { Id = 6, Name = "VIEW_ONLY_TEACHER", Description = "View only own teacher details" },
+            new Capability { Id = 7, Name = "INSERT_STUDENT", Description = "Create a new student" },
+            new Capability { Id = 8, Name = "VIEW_STUDENTS", Description = "View student list and details" },
+            new Capability { Id = 9, Name = "VIEW_STUDENT", Description = "View student" },
+            new Capability { Id = 10, Name = "EDIT_STUDENT", Description = "Modify existing student" },
+            new Capability { Id = 11, Name = "DELETE_STUDENT", Description = "Remove a student" },
+            new Capability { Id = 12, Name = "VIEW_ONLY_STUDENT", Description = "View only own student details" },
+            new Capability { Id = 13, Name = "INSERT_COURSE", Description = "Create a new course" },
+            new Capability { Id = 14, Name = "VIEW_COURSES", Description = "View course list and details" },
+            new Capability { Id = 15, Name = "VIEW_COURSE", Description = "View course" },
+            new Capability { Id = 16, Name = "EDIT_COURSE", Description = "Modify existing course" },
+            new Capability { Id = 17, Name = "DELETE_COURSE", Description = "Remove a course" },
+            new Capability { Id = 18, Name = "VIEW_USERS", Description = "View the list of all users (registry)" },
+            new Capability { Id = 19, Name = "INSERT_ADMIN", Description = "Create another admin user" },
+            new Capability { Id = 20, Name = "ENROLL_STUDENT", Description = "Enroll a student in a course" },
+            new Capability { Id = 21, Name = "UNENROLL_STUDENT", Description = "Remove a student from a course" });
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -102,15 +156,34 @@ public class SchoolRest10Context : DbContext
             entity.Property(e => e.Lastname).HasMaxLength(50);
             entity.Property(e => e.Password).HasMaxLength(60);
             entity.Property(e => e.Username).HasMaxLength(50);
+            entity.Property(e => e.Status).HasConversion<string>().HasMaxLength(20);
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)
-                .OnDelete(DeleteBehavior.Cascade)  
+                .OnDelete(DeleteBehavior.Restrict)  
                 .HasConstraintName("FK_Users_Roles_RoleId");
 
             entity.HasIndex(e => e.Email, "UQ_Users_Email").IsUnique();
             entity.HasIndex(e => e.RoleId, "IX_Users_RoleId");
             entity.HasIndex(e => e.Username, "UQ_Users_Username").IsUnique();
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
+        });
+
+        modelBuilder.Entity<ActivationToken>(entity =>
+        {
+            entity.Property(e => e.TokenHash).HasMaxLength(64).IsRequired();
+
+            entity.HasOne(t => t.User).WithMany()         // withMany() is empty since User does not have a list of tokens.
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_ActivationTokens_Users_UserId");
+
+            entity.HasIndex(e => e.TokenHash, "UQ_ActivationTokens_TokenHash").IsUnique();
+            entity.HasIndex(e => e.UserId, "IX_ActivationTokens_UserId");
+
+            entity.HasQueryFilter(t => !t.User.IsDeleted);
+
         });
     }
 
@@ -138,17 +211,18 @@ public class SchoolRest10Context : DbContext
                     entry.Entity.InsertedAt = now;
                     entry.Entity.ModifiedAt = now;
                     break;
-                                                         // My note: On soft delete, in order for the deleted records to be hidden from the queries the cmd: HasQueryFilter(e => !e.IsDeleted) in OnModelCreating is needed!!! Otherwise, without this the deleted records will be stil visible.
-                //case EntityState.Modified:
-                //    entry.Entity.ModifiedAt = now;
-                //    break;
 
-                //case EntityState.Deleted:
-                //    entry.State = EntityState.Unchanged;
-                //    entry.Entity.IsDeleted = true;
-                //    entry.Entity.DeletedAt = now;
-                //    entry.Entity.ModifiedAt = now;
-                //    break;
+                // My note: On soft delete, in order for the deleted records to be hidden from the queries the cmd: HasQueryFilter(e => !e.IsDeleted) in OnModelCreating is needed!!! Otherwise, without this the deleted records will be stil visible.
+                case EntityState.Modified:
+                    entry.Entity.ModifiedAt = now;
+                    break;
+
+                    //case EntityState.Deleted:
+                    //    entry.State = EntityState.Unchanged;
+                    //    entry.Entity.IsDeleted = true;
+                    //    entry.Entity.DeletedAt = now;
+                    //    entry.Entity.ModifiedAt = now;
+                    //    break;
             }
         }
     }

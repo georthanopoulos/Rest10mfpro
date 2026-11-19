@@ -1,11 +1,11 @@
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using SchoolApp.Configuration;
 using SchoolApp.Data;
-using SchoolApp.Helpers;
+using SchoolApp.Middleware;
 using SchoolApp.Repositories;
 using SchoolApp.Security;
 using SchoolApp.Services;
@@ -18,7 +18,7 @@ namespace SchoolApp
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -33,8 +33,13 @@ namespace SchoolApp
             builder.Services.AddRepositories();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITeacherService, TeacherService>();
+            builder.Services.AddScoped<IStudentService, StudentService>();
+            builder.Services.AddScoped<ICourseService, CourseService>();
             builder.Services.AddScoped<IApplicationService, ApplicationService>();
             builder.Services.AddSingleton<IEncryptionUtil,  EncryptionUtil>();
+            builder.Services.AddSingleton<IActivationTokenUtil, ActivationTokenUtil>();
+
+            builder.Services.AddScoped<DbSeeder>();                                       // DbSeeder added
 
             builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MapperConfig>());
 
@@ -95,20 +100,48 @@ namespace SchoolApp
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("VIEW_USERS", p => p.RequireClaim("Capability", "VIEW_USERS"));
+                options.AddPolicy(Capabilities.ViewUsers, p => p.RequireClaim("Capability", Capabilities.ViewUsers));
+                options.AddPolicy(Capabilities.InsertTeacher, p => p.RequireClaim("Capability", Capabilities.InsertTeacher));
+                options.AddPolicy(Capabilities.InsertStudent, p => p.RequireClaim("Capability", Capabilities.InsertStudent));
+                options.AddPolicy(Capabilities.ViewTeachers, p => p.RequireClaim("Capability", Capabilities.ViewTeachers));
+                options.AddPolicy(Capabilities.EditTeacher, p => p.RequireClaim("Capability", Capabilities.EditTeacher));
+                options.AddPolicy(Capabilities.DeleteTeacher, p => p.RequireClaim("Capability", Capabilities.DeleteTeacher));
+                options.AddPolicy(Capabilities.ViewStudents, p => p.RequireClaim("Capability", Capabilities.ViewStudents));
+                options.AddPolicy(Capabilities.EditStudent, p => p.RequireClaim("Capability", Capabilities.EditStudent));
+                options.AddPolicy(Capabilities.DeleteStudent, p => p.RequireClaim("Capability", Capabilities.DeleteStudent));
+                options.AddPolicy(Capabilities.InsertCourse, p => p.RequireClaim("Capability", Capabilities.InsertCourse));
+                options.AddPolicy(Capabilities.ViewCourses, p => p.RequireClaim("Capability", Capabilities.ViewCourses));
+                options.AddPolicy(Capabilities.ViewCourse, p => p.RequireClaim("Capability", Capabilities.ViewCourse));
+                options.AddPolicy(Capabilities.EditCourse, p => p.RequireClaim("Capability", Capabilities.EditCourse));
+                options.AddPolicy(Capabilities.DeleteCourse, p => p.RequireClaim("Capability", Capabilities.DeleteCourse));
+                options.AddPolicy(Capabilities.EnrollStudent, p => p.RequireClaim("Capability", Capabilities.EnrollStudent));
+                options.AddPolicy(Capabilities.UnenrollStudent, p => p.RequireClaim("Capability", Capabilities.UnenrollStudent));
             });
 
-            var app = builder.Build();
+            builder.Services.AddSingleton<IAuthorizationHandler, OwnerOrCapabilityHandler>();
 
-            
-            app.UseExceptionHandler();              // Configure the HTTP request pipeline.
+            // END of Service registration area (above). Container configs. No object has beed created yet!!!!
+
+
+            var app = builder.Build();             // container is being built - below onwards
+
+
+            // START of the section where the container has already been built and we can ask  objects from app.Services. (eg: Request pipeline, middleware config, seeding and startup actions).    
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+                await seeder.SeedAsync();
+            }
+
+
+                app.UseExceptionHandler();              // Configure the HTTP request pipeline.
 
             if (app.Environment.IsDevelopment())
             {
@@ -122,7 +155,8 @@ namespace SchoolApp
             app.UseHttpsRedirection();
 
             app.UseCors("AllowCFClient");
-            app.UseAuthentication();                        // Enables the authentication middleware in the pipeline. The incoming requests will be checked for JWT token and the HttpContext.User will becoming populate. The HttpContext.User is the principal.
+            app.UseAuthentication();                            // Enables the authentication middleware in the pipeline. The incoming requests will be checked for JWT token and the HttpContext.User will becoming populate. The HttpContext.User is the principal.
+            app.UseMiddleware<MustChangePasswordMiddleware>();
             app.UseAuthorization();
 
 

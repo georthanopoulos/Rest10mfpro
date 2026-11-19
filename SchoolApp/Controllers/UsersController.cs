@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using SchoolApp.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SchoolApp.Core;
 using SchoolApp.Core.Filters;
 using SchoolApp.DTO;
 using SchoolApp.Exceptions;
+using SchoolApp.Security.ResourceAuthorization;
 using SchoolApp.Services;
-using System.Security.Claims;
 
 namespace SchoolApp.Controllers;
 
@@ -14,20 +15,23 @@ namespace SchoolApp.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IApplicationService _applicationService;
+    private readonly IAuthorizationService _authorizationService;
 
-    public UsersController(IApplicationService applicationService)
+    public UsersController(IApplicationService applicationService, IAuthorizationService authorizationService)
     {
         _applicationService = applicationService;
+        _authorizationService = authorizationService;
     }
 
     /// <summary>
-    /// Gets a user by their ID.
+    /// Gets a user by their ID. A user can view only their own profile;
+    /// users with the VIEW_USERS capability can view any user.
     /// </summary>
     /// <param name="id">The user ID.</param>
     /// <returns>The user details.</returns>
     /// <response code="200">Returns the requested user.</response>
     /// <response code="401">If the request is not authenticated.</response>
-    /// <response code="403">If the user lacks permission to view the user.</response>
+    /// <response code="403">If the user is not allowed to view this user.</response>
     /// <response code="404">If no user exists with the given ID.</response>
     [HttpGet("{id:int}")]
     [Authorize]
@@ -37,28 +41,65 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserReadOnlyDTO>> GetUserById(int id)
     {
-        EnsureCanViewUser(id);
+        // The resource IS the user id, so we can authorize before hitting the DB
+        var authResult = await _authorizationService.AuthorizeAsync(
+            User, id, new OwnerOrCapabilityRequirement(Capabilities.ViewUsers));
+
+        if (!authResult.Succeeded)
+        {
+            throw new EntityForbiddenException("User", "You do not have permission to view this user.");
+        }
+
         var user = await _applicationService.UserService.GetUserByIdAsync(id);
         return Ok(user);
     }
 
     /// <summary>
-    /// Gets a user by their username.
+    /// Gets a user by their username. A user can view only their own profile;
+    /// users with the VIEW_USERS capability can view any user.
     /// </summary>
     /// <param name="username">The username to search for.</param>
     /// <returns>The user details.</returns>
     /// <response code="200">Returns the requested user.</response>
     /// <response code="401">If the request is not authenticated.</response>
-    /// <response code="404">If no user exists with the given username.</response>
+    /// <response code="403">If the user is not allowed to view this user (also returned
+    /// to callers without VIEW_USERS when the username does not exist, to prevent username enumeration).</response>
+    /// <response code="404">If no user exists with the given username (only for callers with VIEW_USERS).</response>
     [HttpGet("by-username/{username}")]
     [Authorize]
     [ProducesResponseType(typeof(UserReadOnlyDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserReadOnlyDTO>> GetUserByUsername(string username)
     {
-        EnsureCanViewUser(username);
-        var user = await _applicationService.UserService.GetUserByUsernameAsync(username);
+        UserReadOnlyDTO user;
+
+        try
+        {
+            // We only know the username, so we need the user first to get the owner id
+            user = await _applicationService.UserService.GetUserByUsernameAsync(username);
+        }
+        catch (EntityNotFoundException)
+        {
+            // Callers who may view any user get the honest 404.
+            // Everyone else gets 403, so they cannot learn which usernames exist (preventing from Brute force attack type)..
+            if (User.HasClaim("Capability", Capabilities.ViewUsers))
+            {
+                throw;  // re-throws the aforementioned EntityNotFoundException. 
+            }
+
+            throw new EntityForbiddenException("User", "You do not have permission to view this user.");
+        }
+
+        var authResult = await _authorizationService.AuthorizeAsync(
+            User, user.Id, new OwnerOrCapabilityRequirement(Capabilities.ViewUsers));
+
+        if (!authResult.Succeeded)
+        {
+            throw new EntityForbiddenException("User", "You do not have permission to view this user.");
+        }
+
         return Ok(user);
     }
 
@@ -73,7 +114,7 @@ public class UsersController : ControllerBase
     /// <response code="401">If the request is not authenticated.</response>
     /// <response code="403">If the user lacks permission to list users.</response>
     [HttpGet]
-    [Authorize(Policy = "VIEW_USERS")]
+    [Authorize(Policy = Capabilities.ViewUsers)]
     [ProducesResponseType(typeof(PaginatedResult<UserReadOnlyDTO>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -86,43 +127,5 @@ public class UsersController : ControllerBase
             .GetPaginatedUsersFilteredAsync(pageNumber, pageSize, filters ?? new UserFiltersDTO());
 
         return Ok(result);
-    }
-
-    private void EnsureCanViewUser(int targetUserId)
-    {
-        var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var isOwnProfile = currentUserId == targetUserId;
-
-        EnsureCanViewUserCore(isOwnProfile);
-    }
-
-    private void EnsureCanViewUser(string username)
-    {
-        var currentUsername = User.FindFirst(ClaimTypes.Name)?.Value;
-        var isOwnProfile = string.Equals(currentUsername, username, StringComparison.OrdinalIgnoreCase);
-
-        EnsureCanViewUserCore(isOwnProfile);
-    }
-
-    private void EnsureCanViewUserCore(bool isOwnProfile)
-    {
-        var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
-
-        // Self-view: Teachers και Students μπορούν να δουν τον εαυτό τους
-        if (isOwnProfile && (currentUserRole == "TEACHER" || currentUserRole == "STUDENT"))
-        {
-            return;
-        }
-
-        // Other-view: χρειάζεται VIEW_TEACHER ή VIEW_STUDENT capability
-        //var canViewOthers = User.HasClaim("capability", "VIEW_USER+TEACHER");
-
-        //if (canViewOthers)
-        //{
-        //    return;
-        //}
-
-        throw new EntityForbiddenException("User",
-            "You do not have permission to view this user.");
     }
 }

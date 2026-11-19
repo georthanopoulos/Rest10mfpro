@@ -1,8 +1,11 @@
 .env.*
 !.env.example
+.env
 
 .vs/
 
 # Build output
 **/bin/
 **/obj/
+
+*.user

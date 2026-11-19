@@ -8,5 +8,5 @@ public abstract class BaseEntity
 
     public bool IsDeleted { get; set; } = false;                        // Soft delete
 
-    public DateTime DeletedAt {  get; set; }                            // Soft delete
+    public DateTime? DeletedAt {  get; set; }                            // Soft delete
 }

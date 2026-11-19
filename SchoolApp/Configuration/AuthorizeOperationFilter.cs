@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace SchoolApp.Helpers;
+namespace SchoolApp.Configuration;
 
 public class AuthorizeOperationFilter : IOperationFilter
 {
